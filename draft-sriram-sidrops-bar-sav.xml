@@ -169,8 +169,8 @@ The reader is encouraged to be familiar with <xref target="RFC8704"/>, <xref tar
 
       </section>
 
-	<section anchor="observe">
-	<name>Same Procedure Applies to Customers and Lateral Peers </name>
+        <section anchor="observe">
+        <name>Same Procedure Applies to Customers and Lateral Peers </name>
 
       <t>
 
@@ -179,8 +179,8 @@ The same procedure applies for the construction of a permissible ingress SAV fil
 
  </section>
 
-	<section anchor="method1">
-	<name>SAV Using ASPA and ROA (Procedure X)</name>
+        <section anchor="method1">
+        <name>SAV Using ASPA and ROA (Procedure X)</name>
       <t>
 The method/procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on customer interfaces if it requires all its customers to register ROAs and ASPAs.
       </t>
@@ -216,8 +216,8 @@ A detailed description of Procedure X is as follows:
 </ol>
     </section>
 
-	<section anchor="method2">
-	<name>SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)</name>
+        <section anchor="method2">
+        <name>SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)</name>
 
       <t>
 SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV) is described in this section and is meant for the period when there is a partial deployment of ROAs and ASPAs. To compensate for incomplete RPKI information, BAR-SAV augments ASPA data with BGP UPDATE AS_PATH data for discovering CC ASes, and it augments ROA data with BGP UPDATE data for discovering all prefixes associated with ASes in the CC.  The details of this procedure are described below.
@@ -388,33 +388,30 @@ This section highlights some important operations and management considerations 
 
     <section title="Applicability of ASPA and ROA" anchor="rpki-objects">
       <t>
-A transit provider is one that offers Internet connectivity to outbound (i.e., customer to Internet) data traffic for its customers and/or further propagates any BGP announcements from them. In the latter case, it also provides transport for inbound data traffic.
-      In all cases, the customer AS MUST include the transit provider AS in its ASPA. Registering an ASPA thus helps BAR-SAV (including corner cases) while it does no discernible harm.
+A transit provider is a network that offers its customers outbound (customer to Internet) data traffic connectivity and/or further propagates BGP announcements from them. In the latter case, it also provides transport for inbound data traffic.
+      In all cases, the customer AS MUST include the transit provider AS in its ASPA. Registering an ASPA thus helps BAR-SAV, while it does no discernible harm.
 
       </t>
       <t>
-If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS to facilitate BAR-SAV. One might argue that the registration of a ROA in this scenario might make feasible a forged-origin prefix hijack for the prefix in question. But the following observations are worth noting: (1) the risk is small, (2) the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks, and (3) a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="I-D.ietf-sidrops-rpkimaxlen"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
-      </t>
+If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS to facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since (1) the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks, and (2) a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="I-D.ietf-sidrops-rpkimaxlen"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
 
-      <t>
-Based on the above observations, it appears that the existing ASPA and ROA objects are sufficient for BAR-SAV. Creating new purpose-built ASPA and ROA for the SAV application does not appear to be necessary.
       </t>
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-Regardless of the routing policies of ASes in the customer cone, BAR-SAV applies a multi-pronged approach to obtain all possible source addresses (prefixes) that can be used in the data traffic received on the customer interface of interest. The idea is to find all ASes in a customer's (or lateral peer's) customer cone (CC) and from there find all prefixes that are originated from or used as source addresses in data traffic originated at the ASes in the CC.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
       </t>
     </section>
 
     <section title="Where to Deploy BAR-SAV" anchor="deploy">
       <t>
-A question can be asked where BAR-SAV should be deployed to best match its feasibility and effectiveness. The discussions in Section 3.6.1 of <xref target="RFC8704"/> about feasibility considering the Forwarding Information Base (FIB) size estimates and the networks where SAV would be most effective are applicable to BAR-SAV also. Smaller ISPs (and possibly some midsize and regional ISPs) are expected to implement the BAR-SAV method since SAV in general is most effective closer to the edges of the Internet. For such networks, the conservatively estimated SAV filter list size is only a small fraction of the anticipated FIB memory size (see details in Section 3.6.1 of <xref target="RFC8704"/>.
+The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding Information Base (FIB) size estimates and the networks where SAV would be most effective are applicable to BAR-SAV as well. Smaller ISPs (and possibly some midsize and regional ISPs) are expected to implement the BAR-SAV method, since SAV in general is most effective closer to the edges of the Internet. For such networks, the conservatively estimated SAV filter list size is only a small fraction of the anticipated FIB memory size (see details in Section 3.6.1 of <xref target="RFC8704"/>.
       </t>
     </section>
 
     <section title="Automation is the Key" anchor="auto">
       <t>
-If SAV were done manually, e.g., using ACLs, it usually does not get much adoption because of operational costs or for being prone to making human errors. However, if it is an automated uRPF technique such as BAR-SAV, then the deployment will likely be easy, accurate, and cost effective for the operators. The BAR-SAV method makes it possible to automate the construction of SAV filter lists with very low (possibly zero) probability of improper drop and improper admit of data traffic. Especially, when ASPA adoption significantly picks up alongside the ongoing ROA adoption, BAR-SAV has the ability to capture all possible source addresses (prefixes) accurately for the customer cone of interest.
+SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists with low probability of improper drop and improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV''s accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex cases.
       </t>
     </section>
 
