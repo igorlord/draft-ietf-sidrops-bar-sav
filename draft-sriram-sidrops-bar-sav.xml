@@ -379,8 +379,6 @@ Recommendation: In a DSR scenario, a network operator MUST register ROAs that bi
 
       </section>
 
-
-
     <section title="Operations and Management Considerations" anchor="ops">
 <t>
 This section highlights some important operations and management considerations and was motivated in part to address the comments received from the SIDROPS working group members.
@@ -411,8 +409,30 @@ The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding In
 
     <section title="Automation is the Key" anchor="auto">
       <t>
-SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists with low probability of improper drop and improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV''s accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex cases.
+SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists with low probability of improper drop and improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex cases.
       </t>
+    </section>
+
+    <section title="Implementation Guidelines" anchor="implementation">
+      <t>
+When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be dropped, the use of robust implementation practices in SAV filter construction become paramount. Some of such recommended practices are discussed in this section.
+      </t>
+
+    <section title="Management of Local RPKI Repository Caches" anchor="local-caches">
+      <t>
+RPKI intrustructure does not guarantee continuous avaiability of PRKI repositories. Any system, such as BAR-SAV, that computes SAV filter lists using RPKI data MUST maintain local caches of RPKI signed objects, manifest files (MFTs), and certificate revocation lists (CRLs). Both MFTs and CRLs usually have a validity period of 2-3 days, so the caches SHOULD be refreshed at least daily. If an RPKI repository is unavailable, the latest cached version of the reporitory MUST continue to be used. In the absence of any new CRLs and MFTs, the validator MUST use the most recent ones from the local cache. The validator MUST check expiration time of cached cryptographic objects against the time when the local cache of the repository was last successfully refreshed rather than the time when the expiration check is performed.
+      </t>
+      <t>
+If the local cache of any repository required for BAR-SAV computation is unavailbale and cannot be refreshed from the authoritative repository location, the SAV system should "fail open" and disable SAV function on a given interface. Note that this applies only in case of the unavaibility of repositories required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache a list of repositories whose objects were actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.
+      </t>
+    </section>
+
+    <section title="Management of Objects Temporarelly Missinfg from RPKI Repositories" anchor="missing-objects">
+      <t>
+It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive than too restrictive (which denies legitimate traffic and cases incidents), BAR-SAV implementations SHOULD continue to cache unexpired objects after cache refreshes, even when those objects are missing from the authoritative repositories during the cache refresh. Such retained objects should still be validated against CRLs.
+      </t>
+    </section>
+
     </section>
 
     </section>
