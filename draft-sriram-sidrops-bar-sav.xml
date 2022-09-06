@@ -397,7 +397,7 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops and improper admits. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
       </t>
     </section>
 
@@ -420,16 +420,19 @@ When a SAV filter is used to police data traffic, and an incomplete SAV filter l
 
     <section title="Management of Local RPKI Repository Caches" anchor="local-caches">
       <t>
-RPKI intrustructure does not guarantee continuous avaiability of PRKI repositories. Any system, such as BAR-SAV, that computes SAV filter lists using RPKI data MUST maintain local caches of RPKI signed objects, manifest files (MFTs), and certificate revocation lists (CRLs). Both MFTs and CRLs usually have a validity period of 2-3 days, so the caches SHOULD be refreshed at least daily. If an RPKI repository is unavailable, the latest cached version of the reporitory MUST continue to be used. In the absence of any new CRLs and MFTs, the validator MUST use the most recent ones from the local cache. The validator MUST check expiration time of cached cryptographic objects against the time when the local cache of the repository was last successfully refreshed rather than the time when the expiration check is performed.
+RPKI infrastructure does not guarantee continuous availability or consistency of RPKI repositories. Any system, such as BAR-SAV, that computes SAV filter lists using RPKI data MUST maintain local caches of RPKI signed objects, manifest files (MFTs), and certificate revocation lists (CRLs). Both MFTs and CRLs usually have a validity period of 2-3 days, so the caches SHOULD be refreshed at least daily. If an RPKI repository publication point is unavailable, or there is any other failure fetching its objects, the latest cached version of the objects associated with the repository MUST continue to be used, as described in <xref target="RFC9286"/>.
       </t>
       <t>
-If the local cache of any repository required for BAR-SAV computation is unavailbale and cannot be refreshed from the authoritative repository location, the SAV system should "fail open" and disable SAV function on a given interface. Note that this applies only in case of the unavaibility of repositories required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache a list of repositories whose objects were actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.
+The validator MUST check expiration time of cryptographic objects when they are fetched from the repository before they are added to the local cache. Expiration time SHOULD NOT be checked when a cached object is used to construct a SAV filter later. This applies to RPKI signed objects as well as MFTs and CRLs.
+      </t>
+      <t>
+If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and cannot be fetched from the repository publication point, the SAV system should "fail open" and disable SAV function on a given interface. Note that this applies only in case of the unavailability of objects required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache the most recent list of objects actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.
       </t>
     </section>
 
     <section title="Management of Objects Temporarelly Missinfg from RPKI Repositories" anchor="missing-objects">
       <t>
-It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive than too restrictive (which denies legitimate traffic and cases incidents), BAR-SAV implementations SHOULD continue to cache unexpired objects after cache refreshes, even when those objects are missing from the authoritative repositories during the cache refresh. Such retained objects should still be validated against CRLs.
+It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive rather than too restrictive (which causes improper drops), BAR-SAV implementations MAY continue to cache unexpired objects that are no longer listed in MFTs after a successful fetch operation. Such retained objects MUST still be validated against CRLs. An implementation MAY chose to use such cached objects only for SAV list construction and not for routing authorization. If an implementation chooses to keep such cached objects, it MUST re-validate their expiration time after each successful fetch operation.
       </t>
     </section>
 
@@ -465,6 +468,7 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.4271.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.3704.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8704.xml"/>
+        <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.9286.xml"/>
 
       </references>
 
