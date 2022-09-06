@@ -397,13 +397,13 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops and improper admits. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops and improper admits. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
       </t>
     </section>
 
     <section title="Where to Deploy BAR-SAV" anchor="deploy">
       <t>
-The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding Information Base (FIB) size estimates and the networks where SAV would be most effective are applicable to BAR-SAV as well. Smaller ISPs (and possibly some midsize and regional ISPs) are expected to implement the BAR-SAV method, since SAV in general is most effective closer to the edges of the Internet. For such networks, the conservatively estimated SAV filter list size is only a small fraction of the anticipated FIB memory size (see details in Section 3.6.1 of <xref target="RFC8704"/>.
+The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding Information Base (FIB) size estimates and the networks where SAV would be most effective are applicable to BAR-SAV as well. Smaller ISPs (and possibly some midsize and regional ISPs) are expected to implement the BAR-SAV method, since SAV in general is most effective closer to the edges of the Internet. For such networks, the conservatively estimated SAV filter list size is only a small fraction of the anticipated FIB memory size (see details in Section 3.6.1 of <xref target="RFC8704"/>).
       </t>
     </section>
 
