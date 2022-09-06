@@ -415,15 +415,15 @@ SAV done manually, e.g., using ACLs, usually does not get much adoption because 
 
     <section title="Implementation Guidelines" anchor="implementation">
     <!--
-    Sriram comment: The general guidance regarding RPKI repository outage, MFT/CRL expiry, 
+    Sriram comment: The general guidance regarding RPKI repository outage, MFT/CRL expiry,
     staleness, etc. is that we should simply refer to the doucment where
-    guidance is already provided (e.g., rfc 9286) about such things. We should not paraphrase as that 
+    guidance is already provided (e.g., rfc 9286) about such things. We should not paraphrase as that
     can potentially distort things. If somethings need to be done differently in the ASPA context
     in comparison to what has been stated in another RFC related to, say, ROA (as an example),
     then we need to state that and state our reasons clearly.
     Also, I think we need not state that we'll use MFTs, etc. even if they are stale.
-    The expiry time is 2 to 3 days out and the RPKI repository outage will rarely last more 
-    than a few to several hours. 
+    The expiry time is 2 to 3 days out and the RPKI repository outage will rarely last more
+    than a few to several hours.
     -->
       <t>
 When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be dropped, the use of robust implementation practices in SAV filter construction become paramount. Some of such recommended practices are discussed in this section.
