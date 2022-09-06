@@ -414,6 +414,17 @@ SAV done manually, e.g., using ACLs, usually does not get much adoption because 
     </section>
 
     <section title="Implementation Guidelines" anchor="implementation">
+    <!--
+    Sriram comment: The general guidance regarding RPKI repository outage, MFT/CRL expiry, 
+    staleness, etc. is that we should simply refer to the doucment where
+    guidance is already provided (e.g., rfc 9286) about such things. We should not paraphrase as that 
+    can potentially distort things. If somethings need to be done differently in the ASPA context
+    in comparison to what has been stated in another RFC related to, say, ROA (as an example),
+    then we need to state that and state our reasons clearly.
+    Also, I think we need not state that we'll use MFTs, etc. even if they are stale.
+    The expiry time is 2 to 3 days out and the RPKI repository outage will rarely last more 
+    than a few to several hours. 
+    -->
       <t>
 When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be dropped, the use of robust implementation practices in SAV filter construction become paramount. Some of such recommended practices are discussed in this section.
       </t>
@@ -430,7 +441,7 @@ If the local cache of some repository objects required for BAR-SAV computation i
       </t>
     </section>
 
-    <section title="Management of Objects Temporarelly Missinfg from RPKI Repositories" anchor="missing-objects">
+    <section title="Management of Objects Temporarily Missing from RPKI Repositories" anchor="missing-objects">
       <t>
 It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive rather than too restrictive (which causes improper drops), BAR-SAV implementations MAY continue to cache unexpired objects that are no longer listed in MFTs after a successful fetch operation. Such retained objects MUST still be validated against CRLs. An implementation MAY chose to use such cached objects only for SAV list construction and not for routing authorization. If an implementation chooses to keep such cached objects, it MUST re-validate their expiration time after each successful fetch operation.
       </t>
