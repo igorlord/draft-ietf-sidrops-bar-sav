@@ -387,17 +387,17 @@ This section highlights some important operations and management considerations 
     <section title="Applicability of ASPA and ROA" anchor="rpki-objects">
       <t>
 A transit provider is a network that offers its customers outbound (customer to Internet) data traffic connectivity and/or further propagates BGP announcements from them. In the latter case, it also provides transport for inbound data traffic.
-      In all cases, the customer AS MUST include the transit provider AS in its ASPA. Registering an ASPA thus helps BAR-SAV, while it does no discernible harm.
+      In all cases, the customer AS MUST include the transit provider AS in its ASPA. Registering an ASPA thus prevents forged-origin hijacks for the AS and its prefixes and also helps BAR-SAV, while it does no discernible harm.
 
       </t>
       <t>
-If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS to facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since (1) the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks, and (2) a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="I-D.ietf-sidrops-rpkimaxlen"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
+If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS. This ROA registration assists in preventing hijacking of the prefix and helps facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks. It may be noted that a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="I-D.ietf-sidrops-rpkimaxlen"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
 
       </t>
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops and improper admits. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops. Also, with no improper admits if all ASes within the CC deply BAR-SAV. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest. But this has no impact on BAR-SAV's accuracy.
       </t>
     </section>
 
@@ -437,7 +437,7 @@ RPKI infrastructure does not guarantee continuous availability or consistency of
 The validator MUST check expiration time of cryptographic objects when they are fetched from the repository before they are added to the local cache. Expiration time SHOULD NOT be checked when a cached object is used to construct a SAV filter later. This applies to RPKI signed objects as well as MFTs and CRLs.
       </t>
       <t>
-If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and cannot be fetched from the repository publication point, the SAV system should "fail open" and downgrade SAV function on a given interface to "loose uRPF" described in <xref target="RFC3704"/>. Note that this applies only in case of the unavailability of objects required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache the most recent list of objects actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.
+If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and cannot be fetched from the repository publication point, the SAV system should "fail open" and downgrade SAV function on a given interface to "loose uRPF" described in <xref target="RFC3704"/> <xref target="RFC8704"/>. This downgrade is better than suspend SAV option since at least source addresses in unallocated and unused space are rejected. Note that this applies only in case of the unavailability of objects required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache the most recent list of objects actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.
       </t>
     </section>
 
