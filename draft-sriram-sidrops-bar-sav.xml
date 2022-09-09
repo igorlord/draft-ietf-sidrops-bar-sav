@@ -397,7 +397,7 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops. Deploying BAR-SAV by all ASes within the CC ensures no improper admits. Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source addresses is not admitted). Note that routing policies of ASes in the CC may prevent some of the discovered prefixes from being used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
       </t>
     </section>
 
@@ -437,7 +437,7 @@ RPKI infrastructure does not guarantee continuous availability or consistency of
 The validator MUST check expiration time of cryptographic objects when they are fetched from the repository before they are added to the local cache. Expiration time SHOULD NOT be checked when a cached object is used to construct a SAV filter later. This applies to RPKI signed objects as well as MFTs and CRLs.
       </t>
       <t>
-If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and cannot be fetched from the repository publication point, the SAV system should "fail open" and downgrade SAV function on a given interface to "loose uRPF" described in <xref target="RFC3704"/> and <xref target="RFC8704"/>. This downgrade is better than suspending SAV entirely since at least source addresses in unallocated and unused space are rejected.
+If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and cannot be fetched from the repository publication point, the SAV system SHOULD "fail open" and downgrade SAV function on a given interface to "loose uRPF" described in <xref target="RFC3704"/> and <xref target="RFC8704"/>. This downgrade is better than suspending SAV entirely since at least source addresses in unallocated and unused space are rejected.
 <!-- IL (extra complexity here is not needed): Note that this applies only in case of the unavailability of objects required for BAR-SAV computation. Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache the most recent list of objects actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface. -->
       </t>
     </section>
