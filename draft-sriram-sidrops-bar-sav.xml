@@ -244,7 +244,7 @@ One should not compute a customer cone by separately processing ASPA data and AS
       </t>
 
       <t>
-If a transit provider-to-customer relationship, e.g., from AS X to AS Y, is deduced from AS_PATH data but the ASPA data contradicts it (i.e., AS Y has ASPA and it does not include AS X as a transit provider), then the ASPA data prevails, and AS Y must not be considered to be a customer of X. This design principle is reflected in Step 5 of the procedure described below. (Please see discussion about route leaks in <xref target="Security"/>.)
+If a transit provider-to-customer relationship, e.g., from AS X to AS Y, is deduced from AS_PATH data but the ASPA data contradicts it (i.e., AS Y has ASPA and it does not include AS X as a transit provider), then the ASPA data prevails, and AS Y must not be considered to be a customer of X. Likewise, if a prefix for which ROA data exists is announced by an AS that is not authorized by ROA to announce the prefix, the ROA data prevalis, and the prefix is not included in the SAV filter list due to this announcement.  These design principles are reflected in Steps 5 and 10 of the procedure described below. (Please see discussion about route leaks and mis-origination in <xref target="Security"/>.)
       </t>
 
 
@@ -305,7 +305,7 @@ A detailed description of the BAR-SAV procedure is as follows:
 <li> If AS-set Z(i) is null, then set i_max = i - 1 and go to Step 8. Else, go to Step 3. </li>
 <li> Form the union of the AS-sets, Z(i), i = 1, 2, ..., i_max, and name this union as AS-set D. </li>
 <li> Select all ROAs in which the authorized origin ASN is in AS-set D. Form the union of the sets of prefixes listed in the selected ROAs. Name this union set of prefixes as Prefix-set P1. </li>
-<li> Using the routes in Adj-RIBs-In of all interfaces, create a list of all prefixes originated by any ASN in AS-set D. Name this set of prefixes as Prefix-set P2. </li>
+<li> Using the routes in Adj-RIBs-In of all interfaces, create a list of all "non-ROA" prefixes originated by any ASN in AS-set D. "Non-ROA" prefixes are prefixes that are not covered by any prefix in ROA data. Name this set of prefixes as Prefix-set P2. </li>
 <li> Form the union of Prefix-sets P1 and P2. Apply this union set as the list of permissible prefixes for SAV. </li>
 </ol>
     </section>
