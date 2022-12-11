@@ -169,8 +169,7 @@ The reader is encouraged to be familiar with <xref target="RFC8704"/>, <xref tar
         <name>Same Procedure Applies to Customers and Lateral Peers </name>
 
       <t>
-
-The same procedure applies for the construction of a permissible ingress SAV filter for a customer or lateral peer interface. A customer or lateral peer should transmit data packets with source addresses belonging to only the prefixes that are legitimately used to address subnets/servers/clients at the ASes in its customer cone (CC). The CC includes the AS belonging to the customer or lateral peer.
+The same procedure applies for the construction of a permissible ingress SAV filter for a customer or lateral peer interface. This is because of the following reason. The data packets received from a customer or lateral peer should have source addresses belonging to only the prefixes in the customer cone (CC) of said customer or lateral peer. So, the focus is only on the CC of the neighbor in each case. The CC includes the AS belonging to the customer or lateral peer. 
       </t>
 
  </section>
@@ -178,7 +177,7 @@ The same procedure applies for the construction of a permissible ingress SAV fil
         <section anchor="method1">
         <name>SAV Using ASPA and ROA (Procedure X)</name>
       <t>
-The procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on a customer (or lateral peer) interface if it requires the customer (or peer) AS and all customers in the customer's (or peer's) CC to register ROAs and ASPAs. 
+The procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on a customer (or lateral peer) interface if it has required or has knowledge of full adoption of ROAs and ASPAs in the CC of the neighbor.
       </t>
       <t>
 
@@ -386,7 +385,7 @@ This section highlights some important operations and management considerations 
       <t>
 A transit provider is a network that (a) offers its customers outbound (customer to Internet) data traffic connectivity and/or (b) further propagates in all directions (towards providers, lateral peers, and customers) any BGP Updates that the customer may send <xref target="I-D.ietf-sidrops-aspa-profile"/>.
 In the latter case, it also provides transport for inbound data traffic.
-      In all cases, the customer AS SHOULD follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA thus prevents forged-origin hijacks for the customer AS and its prefixes, also prevents route leaks involving the customer AS, and facilitates BAR-SAV.
+      In all cases, the customer AS SHOULD follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, it also prevents route leaks involving the customer AS, and it facilitates BAR-SAV.
       </t>
       <t>
 If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS. This ROA registration assists in preventing hijacking of the prefix and helps facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks. It may be noted that a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="RFC9319"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
@@ -395,7 +394,7 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source addresses is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source address is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
 
       </t>
     </section>
@@ -467,7 +466,7 @@ It is possible for an RPKI signed object to be temporarily missing from the repo
       <t>The security considerations described in <xref target="RFC8704"/>, <xref target="RFC6811"/>, <xref target="I-D.ietf-sidrops-aspa-profile"/>, and <xref target="I-D.ietf-sidrops-aspa-verification"/> also apply to this document.   
 </t>
 <t>
-The security and robustness of BAR-SAV are strengthened by supporting mechanisms for detecting and dropping BGP routes that are misoriginations or leaks. As mentioned in <xref target="method2"/>, BGP routes received at BGP speakers MUST be validated using RPKI-ROV <xref target="RFC6811"/>. It further helps if route validation using trusted IRR route objects and prefix filtering are also deployed (see <xref target="RFC7454"/> <xref target="NIST-800-189"/>). It is also advised that one or more of the available methods to prevent, detect, and mitigate route leaks are deployed (e.g., <xref target="RFC9234"/> <xref target="I-D.ietf-grow-route-leak-detection-mitigation"/> <xref target="I-D.ietf-sidrops-aspa-verification"/> <xref target="sriram1"/>).
+The security and robustness of BAR-SAV are strengthened by supporting mechanisms for detecting and dropping BGP routes that are misoriginations or leaks. <xref target="method2"/> stated the requirement of validating BGP route origins using RPKI-ROV <xref target="RFC6811"/>. It further helps if route origin validation using trusted IRR route objects and prefix filtering are also deployed (see <xref target="RFC7454"/> <xref target="NIST-800-189"/>). It is also advised that one or more of the available methods to prevent, detect, and mitigate route leaks are deployed (e.g., <xref target="RFC9234"/> <xref target="I-D.ietf-grow-route-leak-detection-mitigation"/> <xref target="I-D.ietf-sidrops-aspa-verification"/> <xref target="sriram1"/>).
 </t>
 
     </section>
@@ -488,9 +487,6 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8704.xml"/>
 
-&I-D.ietf-sidrops-aspa-profile;
-&I-D.ietf-sidrops-aspa-verification;
-
       </references>
 
       <references>
@@ -503,6 +499,8 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.9286.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.9319.xml"/>
 
+&I-D.ietf-sidrops-aspa-profile;
+&I-D.ietf-sidrops-aspa-verification;
 &I-D.ietf-grow-route-leak-detection-mitigation;
 &I-D.ietf-sidrops-8210bis;
 
