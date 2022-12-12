@@ -169,7 +169,7 @@ The reader is encouraged to be familiar with <xref target="RFC8704"/>, <xref tar
         <name>Same Procedure Applies to Customers and Lateral Peers </name>
 
       <t>
-The same procedure applies for the construction of a permissible ingress SAV filter for a customer or lateral peer interface. This is because of the following reason. The data packets received from a customer or lateral peer should have source addresses belonging to only the prefixes in the customer cone (CC) of said customer or lateral peer. So, the focus is only on the CC of the neighbor in each case. The CC includes the AS belonging to the customer or lateral peer.
+The same procedure applies for the construction of a permissible ingress SAV filter for a customer or lateral peer interface, because the data packets received from a customer or lateral peer should have source addresses belonging only to the prefixes in the customer cone (CC) of said customer or lateral peer. The focus, therefore, is only on the CC of the neighbor in each case. Note that the CC includes the AS belonging to the customer or lateral peer.
       </t>
 
  </section>
@@ -177,7 +177,7 @@ The same procedure applies for the construction of a permissible ingress SAV fil
         <section anchor="method1">
         <name>SAV Using ASPA and ROA (Procedure X)</name>
       <t>
-The procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on a customer (or lateral peer) interface if it has required or has knowledge of full adoption of ROAs and ASPAs in the CC of the neighbor.
+The procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on a customer (or lateral peer) interface if it expects full adoption of ROAs and ASPAs in the CC of the neighbor.
       </t>
       <t>
 
@@ -383,9 +383,9 @@ This section highlights some important operations and management considerations 
 
     <section title="Applicability of ASPA and ROA" anchor="rpki-objects">
       <t>
-A transit provider is a network that (a) offers its customers outbound (customer to Internet) data traffic connectivity and/or (b) further propagates in all directions (towards providers, lateral peers, and customers) any BGP Updates that the customer may send <xref target="I-D.ietf-sidrops-aspa-profile"/>.
+A transit provider is a network that (a) offers its customers outbound (customer to Internet) data traffic connectivity and/or (b) further propagates in all directions (towards providers, lateral peers, and other customers) any BGP Updates that the customer may send <xref target="I-D.ietf-sidrops-aspa-profile"/>.
 In the latter case, it also provides transport for inbound data traffic.
-      In all cases, the customer AS SHOULD follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, it also prevents route leaks involving the customer AS, and it facilitates BAR-SAV.
+      In all cases, the customer AS SHOULD follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, prevents route leaks involving the customer AS, and facilitates BAR-SAV.
       </t>
       <t>
 If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA MUST be registered binding the prefix and the AS. This ROA registration assists in preventing hijacking of the prefix and helps facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since the ASPA-based path verification <xref target="I-D.ietf-sidrops-aspa-verification"/> prevents forged-origin attacks. It may be noted that a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="RFC9319"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
@@ -395,7 +395,6 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
 BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source address is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
-
       </t>
     </section>
 
@@ -407,7 +406,7 @@ The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding In
 
     <section title="Automation is the Key" anchor="auto">
       <t>
-SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists with the aim of zero probability of improper drop and minimal probability of improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex scenarios.
+SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists aiming for no improper drops and a minimal probability of improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex scenarios.
       </t>
     </section>
 
