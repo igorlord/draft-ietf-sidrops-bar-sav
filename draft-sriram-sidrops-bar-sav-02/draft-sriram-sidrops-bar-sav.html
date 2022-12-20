@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)</title>
+<meta content="Kotikalapudi Sriram" name="author">
+<meta content="Igor Lubashev" name="author">
+<meta content="Doug Montgomery" name="author">
+<meta content="
+       
+Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding dropping legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
+       
+    " name="description">
+<meta content="xml2rfc 3.15.3" name="generator">
+<meta content="Source Address Validation, SAV, unicast Reverse Path Forwarding, uRPF, BGP" name="keyword">
+<meta content="draft-sriram-sidrops-bar-sav-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.15.3
+    Python 3.10.8
+    appdirs 1.4.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 2.5.2
+    html5lib 1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.1
+    MarkupSafe 2.1.1
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.28.1
+    setuptools 65.6.0
+    six 1.16.0
+    wcwidth 0.2.5
+-->
+<link href="draft-sriram-sidrops-bar-sav.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+  min-width: 12ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 8em !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([stroke="fill"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">BAR-SAV</td>
+<td class="right">December 2022</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Sriram, et al.</td>
+<td class="center">Expires 21 June 2023</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Internet Engineering Task Force (IETF)</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-sriram-sidrops-sav-using-aspa-roa</dd>
+<dt class="label-updates">Updates:</dt>
+<dd class="updates">
+<a href="https://www.rfc-editor.org/rfc/rfc8704" class="eref">8704</a> (if approved)</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2022-12-18" class="published">18 December 2022</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Best Current Practice</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2023-06-21">21 June 2023</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">K. Sriram</div>
+<div class="org">USA NIST</div>
+</div>
+<div class="author">
+      <div class="author-name">I. Lubashev</div>
+<div class="org">Akamai</div>
+</div>
+<div class="author">
+      <div class="author-name">D. Montgomery</div>
+<div class="org">USA NIST</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">
+Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding dropping legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 21 June 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2022 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-requirements-language" class="internal xref">Requirements Language</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-same-procedure-applies-to-c" class="internal xref">Same Procedure Applies to Customers and Lateral Peers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-sav-using-aspa-and-roa-proc" class="internal xref">SAV Using ASPA and ROA (Procedure X)</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-sav-using-bgp-update-messag" class="internal xref">SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-operational-recommendations" class="internal xref">Operational Recommendations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-considerations-for-the-cdn-" class="internal xref">Considerations for the CDN and DSR Scenario</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-operations-and-management-c" class="internal xref">Operations and Management Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-applicability-of-aspa-and-r" class="internal xref">Applicability of ASPA and ROA</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-bar-sav-and-routing-policy" class="internal xref">BAR-SAV and Routing Policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-where-to-deploy-bar-sav" class="internal xref">Where to Deploy BAR-SAV</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-automation-is-the-key" class="internal xref">Automation is the Key</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-implementation-guidelines" class="internal xref">Implementation Guidelines</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5.2.1">
+                    <p id="section-toc.1-1.6.2.5.2.1.1"><a href="#section-6.5.1" class="auto internal xref">6.5.1</a>.  <a href="#name-management-of-local-rpki-re" class="internal xref">Management of Local RPKI Repository Caches</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">
+
+Spoofed source addresses are often used in Denial of Service (DoS) and Distributed DoS (DDoS) attacks. Source address validation (SAV) filtering is used to drop packets with spoofed source addresses (see BCP 84 <span>[<a href="#RFC3704" class="cite xref">RFC3704</a>]</span> <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>). A detailed review of unicast Reverse Path Forwarding (uRPF) techniques for SAV is provided in <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>). Also, <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> describes enhanced feasible-path uRPF (EFP-uRPF) methods that aim to minimize false positives (i.e., avoid dropping legitimate traffic) while maintaining directionality (see definitions in <span>[<a href="#RFC3704" class="cite xref">RFC3704</a>]</span>).<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">
+New technology for securing the Border Gateway Protocol (BGP) <span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span> using Resource Public Key Infrastructure (RPKI) <span>[<a href="#RFC6480" class="cite xref">RFC6480</a>]</span> is seeing increasing adoption. Two of the currently existing or proposed types of signed objects in the RPKI can be leveraged for a more accurate SAV filter design as well.
+
+These are the Route Origin Authorization (ROA) and the Autonomous System Provider Authorizations (ASPA) objects. A ROA is a cryptographically signed attestation by an IP address-resource holder listing their prefixes that are authorized to be originated in BGP by a specific autonomous system (AS) <span>[<a href="#RFC6482" class="cite xref">RFC6482</a>]</span>. ROAs are currently used for RPKI-based Route Origin Validation (RPKI-ROV) <span>[<a href="#RFC6811" class="cite xref">RFC6811</a>]</span> <span>[<a href="#RFC9319" class="cite xref">RFC9319</a>]</span>.
+
+An ASPA is a cryptographically signed attestation by an AS listing its transit provider AS numbers (ASNs) <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span>. The ASPA data is designed to be used for a form of AS path validation that can detect and mitigate route leaks <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span> <span>[<a href="#sriram1" class="cite xref">sriram1</a>]</span>. See <span>[<a href="#RFC7908" class="cite xref">RFC7908</a>]</span> for the definition of route leaks.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">
+
+This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <a href="#method1" class="auto internal xref">Section 3</a> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is considered to be ubiquitous. However, for use in the period before that, another method for SAV is presented in <a href="#method2" class="auto internal xref">Section 4</a> that makes complementary use of BGP UPDATE messages along with ASPA and ROA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is hoped that just as the adoption of ROAs is growing at present <span>[<a href="#Monitor" class="cite xref">Monitor</a>]</span>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">
+The focus of this document is on the design of ingress SAV filters for an interface facing a customer or lateral peer AS. The same procedure applies in both cases (<a href="#observe" class="auto internal xref">Section 2</a>).<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">
+Throughout this document, ROA and ASPA data mean the payload data in cryptographically valid ROA and ASPA objects (see Section 4 in <span>[<a href="#RFC6482" class="cite xref">RFC6482</a>]</span> and Section 4 in <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span>).<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">
+The reader is encouraged to be familiar with <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>, <span>[<a href="#RFC6482" class="cite xref">RFC6482</a>]</span>,  <span>[<a href="#RFC6811" class="cite xref">RFC6811</a>]</span>, <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span>, and <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span>.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7"></p>
+<section id="section-1.1">
+        <h3 id="name-requirements-language">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-requirements-language" class="section-name selfRef">Requirements Language</a>
+        </h3>
+<p id="section-1.1-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
+          "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+          RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+          interpreted as described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>
+          <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in
+          all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+<div id="observe">
+<section id="section-2">
+      <h2 id="name-same-procedure-applies-to-c">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-same-procedure-applies-to-c" class="section-name selfRef">Same Procedure Applies to Customers and Lateral Peers</a>
+      </h2>
+<p id="section-2-1">
+The same procedure applies for the construction of a permissible ingress SAV filter for a customer or lateral peer interface, because the data packets received from a customer or lateral peer should have source addresses belonging only to the prefixes in the customer cone (CC) of said customer or lateral peer. The focus, therefore, is only on the CC of the neighbor in each case. Note that the CC includes the AS belonging to the customer or lateral peer.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="method1">
+<section id="section-3">
+      <h2 id="name-sav-using-aspa-and-roa-proc">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-sav-using-aspa-and-roa-proc" class="section-name selfRef">SAV Using ASPA and ROA (Procedure X)</a>
+      </h2>
+<p id="section-3-1">
+The procedure (called Procedure X) described in this section is for future scenarios when ASPA and ROA adoption is ubiquitous. In that scenario, robust SAV filters can be generated from the RPKI information (ASPA and ROA data) alone. The procedure is applicable for ingress SAV filter design for customer and lateral peer interfaces. An ISP may use Procedure X on a customer (or lateral peer) interface if it expects full adoption of ROAs and ASPAs in the CC of the neighbor.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">
+
+A description of Procedure X (one that makes use of only ASPA and ROA data):<a href="#section-3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-3.1">Step A: Compute the set of ASNs in the Customer's or Lateral Peer's customer cone using ASPA data.<a href="#section-3-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-3-3.2">Step B: Compute from ROA data the set of prefixes authorized to be announced by the ASNs found in Step A. Keep only the unique prefixes. This set is the permissible prefix list for SAV for the interface in consideration.<a href="#section-3-3.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-3-4">
+A detailed description of Procedure X is as follows:<a href="#section-3-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-5">
+
+<li id="section-3-5.1"> Let the Customer or Lateral Peer ASN be denoted as AS-k.<a href="#section-3-5.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.2"> Let i = 1. Initialize: AS-set S(1) = {AS-k}.<a href="#section-3-5.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.3"> Increment i to i+1.<a href="#section-3-5.3" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.4"> Create AS-set S(i) of all ASNs whose ASPA data declares at least one ASN in AS-set S(i-1) as a Provider.<a href="#section-3-5.4" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.5">If AS-set S(i) is null, then set i_max = i - 1 and go to Step 6. Else, go to Step 3.<a href="#section-3-5.5" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.6">Form the union of the sets, S(i), i = 1, 2, ..., i_max, and name this union as AS-set A.<a href="#section-3-5.6" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.7">Select all ROAs in which the authorized origin ASN is equal to any ASN in AS-set A. Form the union of the sets of prefixes listed in the selected ROAs. Name this union set of prefixes as P-set.<a href="#section-3-5.7" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-5.8">Apply P-set as the list of permissible prefixes for SAV.<a href="#section-3-5.8" class="pilcrow">¶</a>
+</li>
+      </ol>
+</section>
+</div>
+<div id="method2">
+<section id="section-4">
+      <h2 id="name-sav-using-bgp-update-messag">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-sav-using-bgp-update-messag" class="section-name selfRef">SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)</a>
+      </h2>
+<p id="section-4-1">
+SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV) is described in this section and is meant for the period when there is a partial deployment of ROAs and ASPAs. To compensate for incomplete RPKI information, BAR-SAV augments ASPA data with BGP UPDATE AS_PATH data for discovering CC ASes, and it augments ROA data with BGP UPDATE data for discovering all prefixes associated with ASes in the CC.  The details of this procedure are described below.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">
+
+   BAR-SAV additionally incorporates a refined version of Algorithm A of
+   EFP-uRPF (Section 3.1 of <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>).  Algorithm A in
+   [RFC8704] picked only the originating ASes from AS_PATHs received on
+   the customer or lateral peer interface in consideration
+   and included them for SAV filter computation.  The variant of
+   Algorithm A in <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> used here includes all ASes in the AS_PATHs
+   for the SAV filter computation.  Unless there is a route leak <span>[<a href="#RFC7908" class="cite xref">RFC7908</a>]</span>, each AS is a customer of the AS added next in AS_PATHs of BGP UPDATE messages
+   received from a customer or lateral peer.  Further customer-provider AS relations within the CC are discovered by examining all unique ASes in the
+   AS_PATHs in BGP UPDATEs received on all interfaces (from transit providers, customers, lateral peers, and IBGP peers). This is described in the step-by-step procedure later in this section.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">
+Note that if a multi-homed AS is present in an above-mentioned AS_PATH and did not originate any prefix in the CC in consideration but originated a prefix into an overlapping neighboring CC, then the AS and prefix will still be detected and included in the design of the SAV filter. This improves the accuracy of the SAV filter in the BAR-SAV method in comparison to Algorithm A in <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">
+One should not compute a customer cone by separately processing ASPA data and AS_PATH data and then merging the two sets of ASes at the end. Doing so is likely to miss ASes from the customer cone. Instead, both ASPAs and AS_PATHs should be used to iteratively expand the discovered customer cone. When new ASes are discovered, both ASPA and AS_PATH data should be used to discover customers of those ASes. This process is repeated for newly discovered customer ASes until there are no new ASes to be found.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">
+As a measure of security, validation of the AS_PATH data in Adj-RIBs-In <span>[<a href="#RFC4271" class="cite xref">RFC4271</a>]</span> SHOULD be performed using the procedures in <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span> and any Invalid AS_PATHs must be excluded from inputs to the BAR-SAV procedure. This ensures that BGP UPDATEs containing route leaks are not considered for BAR-SAV filter design. Please see additional discussion about route leaks in <a href="#Security" class="auto internal xref">Section 8</a>.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">
+As a further measure of security, validation of BGP routes in Adj-RIBs-In MUST be performed by applying RPKI-ROV <span>[<a href="#RFC6811" class="cite xref">RFC6811</a>]</span> and any Invalid routes must be excluded from inputs to the BAR-SAV procedure. Please see additional discussion about prefix/route filtering in <a href="#Security" class="auto internal xref">Section 8</a>.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">
+A detailed description of the BAR-SAV procedure is as follows:<a href="#section-4-7" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4-8">
+
+<li id="section-4-8.1"> Let the Customer or Lateral Peer ASN be denoted as AS-k.<a href="#section-4-8.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.2"> Let i = 1. Initialize: AS-set Z(1) = {AS-k}.<a href="#section-4-8.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.3"> Increment i to i+1.<a href="#section-4-8.3" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.4"> Create AS-set A(i) of all ASNs whose ASPA data declares at least one ASN in AS-set Z(i-1) as a Provider.<a href="#section-4-8.4" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.5"> Create AS-set B(i) of all customer ASNs each of which is a customer of at least one ASN in AS-set Z(i-1) according to unique AS_PATHs in Adj-RIBs-In of all interfaces at the BGP speaker computing the SAV filter.<a href="#section-4-8.5" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.6"> Form the union of AS-sets A(i) and B(i) and call it AS-set C. From AS-set C, remove any ASNs that are present in Z(j), for j=1 to j=(i-1). Call the resulting set Z(i).<a href="#section-4-8.6" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.7"> If AS-set Z(i) is null, then set i_max = i - 1 and go to Step 8. Else, go to Step 3.<a href="#section-4-8.7" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.8"> Form the union of the AS-sets, Z(i), i = 1, 2, ..., i_max, and name this union as AS-set D.<a href="#section-4-8.8" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.9"> Select all ROAs in which the authorized origin ASN is in AS-set D. Form the union of the sets of prefixes listed in the selected ROAs. Name this union set of prefixes as Prefix-set P1.<a href="#section-4-8.9" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.10"> Using the routes in Adj-RIBs-In of all interfaces, create a list of all prefixes originated by any ASN in AS-set D. Name this set of prefixes as Prefix-set P2.<a href="#section-4-8.10" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-8.11"> Form the union of Prefix-sets P1 and P2. Apply this union set as the list of permissible prefixes for SAV.<a href="#section-4-8.11" class="pilcrow">¶</a>
+</li>
+      </ol>
+</section>
+</div>
+<div id="recomm">
+<section id="section-5">
+      <h2 id="name-operational-recommendations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-operational-recommendations" class="section-name selfRef">Operational Recommendations</a>
+      </h2>
+<p id="section-5-1">
+Network operators SHOULD implement the BAR-SAV method (<a href="#method2" class="auto internal xref">Section 4</a>) for computing the permissible ingress prefix list for SAV on interfaces facing customers and lateral peers. BAR-SAV offers immediate incremental benefits to early adopters.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">
+The operational recommendations provided in Section 3.2 of <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> are applicable and helpful for BAR-SAV (<a href="#method2" class="auto internal xref">Section 4</a>). Since Procedure X (<a href="#method1" class="auto internal xref">Section 3</a>) and the BAR-SAV procedure (<a href="#method2" class="auto internal xref">Section 4</a>) benefit from the registration of ROAs, network operators are RECOMMENDED to register ROAs and enable RPKI-ROV in their ASes. When ASPA registration becomes available, network operators are also RECOMMENDED to register ASPAs at that time.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">
+The registration of ROAs and ASPAs helps with the detection and inclusion of otherwise hidden prefixes in the permissible list for SAV. As mentioned earlier, prefixes hidden in other SAV techniques often arise from the use of multi-homing in conjunction with limited propagation of prefixes in a given CC (for example, by attaching NO_EXPORT to all prefixes announced from a customer AS to a transit provider AS). In these situations, the registration of ASPAs and ROAs helps improve the accuracy of SAV.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<div id="cdn">
+<section id="section-5.1">
+        <h3 id="name-considerations-for-the-cdn-">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-considerations-for-the-cdn-" class="section-name selfRef">Considerations for the CDN and DSR Scenario</a>
+        </h3>
+<p id="section-5.1-1">
+Direct Server Return (DSR) is a common asymmetric routing scenario that is not supported by existing BCP-84 uRPF <span>[<a href="#RFC3704" class="cite xref">RFC3704</a>]</span> and EFP-uRPF <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> SAV methods.  DSR is commonly used by Content Delivery Networks (CDNs) that wish to use anycast service addresses but deliver data from edge locations that do not announce anycast addresses.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">
+For example, in <a href="#fig1" class="auto internal xref">Figure 1</a>, the CDN announces an anycast prefix P3 (from AS3) from a well-connected location with CDN control infrastructure. When a User from prefix P1 (AS1) establishes a connection to the anycast address and requests an object, an Anycast Server at the CDN may determine that the best location to serve the object is an Edge Server in a location close to the User. The Edge Server is reachable only via prefix P2 (AS2). The Anycast Server can forward packets arriving from the User to the Edge Server (via IP-IP tunneling or similar means), but the bulk data transmission would need to happen directly from the Edge Server to the User with an anycast source address (a P3 address).<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<span id="name-illustration-of-how-the-sol"></span><div id="fig1">
+<figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-5.1-3.1">
+<pre>
+                 +----------+   P3[AS5 AS3]  +------------+
+                 |    AS4   |&lt;---------------|     AS5    |
+                 +----------+      (P2P)     +------------+
+                     /\   /\                        /\
+                     /     \                         \
+             P1[AS1]/       \P2[AS2]                  \P3[AS3]
+              (C2P)/         \(C2P)                    \(C2P)
+                  /           \                         \
+           +----------+    +----------+           +----------+
+           |  AS1 (P1)|    | AS2 (P2) |           | AS3 (P3) |
+           +-----+----+    +----+-----+           +-----+----+
+                 +              +                       +
+               User       Edge Server (DSR)      Anycast Server
+
+          Consider AS4 generating SAV list for interface to AS2:
+          CDN's ROAs: {P3 AS3}, {P3, AS2}, {P2, AS2}
+          AS2 should not/does not announce P3
+          With the SAV methods in this document,
+             AS4 correctly includes P2 and P3 in the SAV list
+
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-illustration-of-how-the-sol" class="selfRef">Illustration of how the solution functions for the CDN/DSR scenario.</a>
+          </figcaption></figure>
+</div>
+<p id="section-5.1-4">
+Existing SAV methods of <span>[<a href="#RFC3704" class="cite xref">RFC3704</a>]</span> and EFP-uRPF <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> would not allow AS4 to include P3 as a legitimate SA prefix on the interface to AS2. However, if the CDN (owner of prefix P3) registers a ROA object authorizing AS2 to originate P3, and AS4 uses an SAV procedure specified in this document (<a href="#method2" class="auto internal xref">Section 4</a>), then AS4 will use that ROA object to include P3 as a valid source prefix for the AS2 customer interface. The CDN may never want to announce a route to P3 from AS2, but the existence of this ROA would result in the construction of an SAV filter that would permit AS2 to send data packets with source addresses belonging to P3.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.1-5">
+The CDN example above is just one DSR scenario. There are other cloud-based DSR scenarios that include low-latency gaming, mobile roaming, corporate networks of global enterprises, and others.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.1-6">
+Recommendation: In a DSR scenario, a network operator MUST register ROAs that bind the edge server ASes with the anycast service prefix. This is in addition to registering a ROA authorizing the anycast server AS to announce the anycast prefix.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="ops">
+<section id="section-6">
+      <h2 id="name-operations-and-management-c">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-operations-and-management-c" class="section-name selfRef">Operations and Management Considerations</a>
+      </h2>
+<p id="section-6-1">
+This section highlights some important operations and management considerations and was motivated in part to address the comments received from the SIDROPS working group members.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="rpki-objects">
+<section id="section-6.1">
+        <h3 id="name-applicability-of-aspa-and-r">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-applicability-of-aspa-and-r" class="section-name selfRef">Applicability of ASPA and ROA</a>
+        </h3>
+<p id="section-6.1-1">
+A transit provider is a network that (a) offers its customers outbound (customer to Internet) data traffic connectivity and/or (b) further propagates in all directions (towards providers, lateral peers, and other customers) any BGP Updates that the customer may send <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span>.
+In the latter case, it also provides transport for inbound data traffic.
+      In all cases, the customer AS SHOULD follow the specification in <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, prevents route leaks involving the customer AS, and facilitates BAR-SAV.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">
+If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <a href="#cdn" class="auto internal xref">Section 5.1</a>), a ROA MUST be registered binding the prefix and the AS. This ROA registration assists in preventing hijacking of the prefix and helps facilitate BAR-SAV. The risk of this ROA registration enabling a forged-origin prefix hijack for the prefix is minimal since the ASPA-based path verification <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span> prevents forged-origin attacks. It may be noted that a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <span>[<a href="#RFC9319" class="cite xref">RFC9319</a>]</span>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="routing-policy">
+<section id="section-6.2">
+        <h3 id="name-bar-sav-and-routing-policy">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-bar-sav-and-routing-policy" class="section-name selfRef">BAR-SAV and Routing Policy</a>
+        </h3>
+<p id="section-6.2-1">
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source address is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="deploy">
+<section id="section-6.3">
+        <h3 id="name-where-to-deploy-bar-sav">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-where-to-deploy-bar-sav" class="section-name selfRef">Where to Deploy BAR-SAV</a>
+        </h3>
+<p id="section-6.3-1">
+The discussion in Section 3.6.1 of <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span> of the Forwarding Information Base (FIB) size estimates and the networks where SAV would be most effective are applicable to BAR-SAV as well. Smaller ISPs (and possibly some midsize and regional ISPs) are expected to implement the BAR-SAV method, since SAV in general is most effective closer to the edges of the Internet. For such networks, the conservatively estimated SAV filter list size is only a small fraction of the anticipated FIB memory size (see details in Section 3.6.1 of <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>).<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="auto">
+<section id="section-6.4">
+        <h3 id="name-automation-is-the-key">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-automation-is-the-key" class="section-name selfRef">Automation is the Key</a>
+        </h3>
+<p id="section-6.4-1">
+SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists aiming for no improper drops and a minimal probability of improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex scenarios.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="implementation">
+<section id="section-6.5">
+        <h3 id="name-implementation-guidelines">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-implementation-guidelines" class="section-name selfRef">Implementation Guidelines</a>
+        </h3>
+<p id="section-6.5-1">
+When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be dropped, the use of robust implementation practices for RPKI data retrieval and cache management practices become paramount. Some of such recommended practices are discussed in this section.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+<div id="local-caches">
+<section id="section-6.5.1">
+          <h4 id="name-management-of-local-rpki-re">
+<a href="#section-6.5.1" class="section-number selfRef">6.5.1. </a><a href="#name-management-of-local-rpki-re" class="section-name selfRef">Management of Local RPKI Repository Caches</a>
+          </h4>
+<p id="section-6.5.1-1">
+RPKI infrastructure does not guarantee continuous availability of RPKI repositories. Local caches of RPKI signed objects, manifest files (MFTs), and certificate revocation lists (CRLs) are already maintained for managing ROA objects and router certificates <span>[<a href="#RFC8210" class="cite xref">RFC8210</a>]</span>. That is being extended to ASPA objects as well <span>[<a href="#I-D.ietf-sidrops-8210bis" class="cite xref">I-D.ietf-sidrops-8210bis</a>]</span>. The cache refresh frequency currently used for RPKI data should be sufficient for BAR-SAV purposes as well. If an RPKI repository publication point is unavailable, or there is any other failure in fetching its objects, the latest cached version of the objects associated with the repository MUST continue to be used, as described in <span>[<a href="#RFC9286" class="cite xref">RFC9286</a>]</span>.<a href="#section-6.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.5.1-2">
+If the local cache of some repository objects required for BAR-SAV computation is unavailable (for example, due to a filesystem failure) and/or the RPKI data cannot be fetched from the repository publication point, the SAV system SHOULD "fail open" and downgrade the SAV function on a given interface to "loose uRPF" described in <span>[<a href="#RFC3704" class="cite xref">RFC3704</a>]</span> and <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>. This downgrade is better than suspending SAV entirely since at least source addresses in unallocated and bogon space are rejected.<a href="#section-6.5.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="IANA">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">This document includes no request to IANA.<a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="Security">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The security considerations described in <span>[<a href="#RFC8704" class="cite xref">RFC8704</a>]</span>, <span>[<a href="#RFC6811" class="cite xref">RFC6811</a>]</span>, <span>[<a href="#I-D.ietf-sidrops-aspa-profile" class="cite xref">I-D.ietf-sidrops-aspa-profile</a>]</span>, and <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span> also apply to this document.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">
+The security and robustness of BAR-SAV are strengthened by supporting mechanisms for detecting and dropping BGP routes that are misoriginations or leaks. <a href="#method2" class="auto internal xref">Section 4</a> stated the requirement of validating BGP route origins using RPKI-ROV <span>[<a href="#RFC6811" class="cite xref">RFC6811</a>]</span>. It further helps if route origin validation using trusted IRR route objects and prefix filtering are also deployed (see <span>[<a href="#RFC7454" class="cite xref">RFC7454</a>]</span> <span>[<a href="#NIST-800-189" class="cite xref">NIST-800-189</a>]</span>). It is also advised that one or more of the available methods to prevent, detect, and mitigate route leaks are deployed (e.g., <span>[<a href="#RFC9234" class="cite xref">RFC9234</a>]</span> <span>[<a href="#I-D.ietf-grow-route-leak-detection-mitigation" class="cite xref">I-D.ietf-grow-route-leak-detection-mitigation</a>]</span> <span>[<a href="#I-D.ietf-sidrops-aspa-verification" class="cite xref">I-D.ietf-sidrops-aspa-verification</a>]</span> <span>[<a href="#sriram1" class="cite xref">sriram1</a>]</span>).<a href="#section-8-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3704">[RFC3704]</dt>
+        <dd>
+<span class="refAuthor">Baker, F.</span> and <span class="refAuthor">P. Savola</span>, <span class="refTitle">"Ingress Filtering for Multihomed Networks"</span>, <span class="seriesInfo">BCP 84</span>, <span class="seriesInfo">RFC 3704</span>, <span class="seriesInfo">DOI 10.17487/RFC3704</span>, <time datetime="2004-03" class="refDate">March 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3704">https://www.rfc-editor.org/info/rfc3704</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4271">[RFC4271]</dt>
+        <dd>
+<span class="refAuthor">Rekhter, Y., Ed.</span>, <span class="refAuthor">Li, T., Ed.</span>, and <span class="refAuthor">S. Hares, Ed.</span>, <span class="refTitle">"A Border Gateway Protocol 4 (BGP-4)"</span>, <span class="seriesInfo">RFC 4271</span>, <span class="seriesInfo">DOI 10.17487/RFC4271</span>, <time datetime="2006-01" class="refDate">January 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4271">https://www.rfc-editor.org/info/rfc4271</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6480">[RFC6480]</dt>
+        <dd>
+<span class="refAuthor">Lepinski, M.</span> and <span class="refAuthor">S. Kent</span>, <span class="refTitle">"An Infrastructure to Support Secure Internet Routing"</span>, <span class="seriesInfo">RFC 6480</span>, <span class="seriesInfo">DOI 10.17487/RFC6480</span>, <time datetime="2012-02" class="refDate">February 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6480">https://www.rfc-editor.org/info/rfc6480</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6482">[RFC6482]</dt>
+        <dd>
+<span class="refAuthor">Lepinski, M.</span>, <span class="refAuthor">Kent, S.</span>, and <span class="refAuthor">D. Kong</span>, <span class="refTitle">"A Profile for Route Origin Authorizations (ROAs)"</span>, <span class="seriesInfo">RFC 6482</span>, <span class="seriesInfo">DOI 10.17487/RFC6482</span>, <time datetime="2012-02" class="refDate">February 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6482">https://www.rfc-editor.org/info/rfc6482</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6811">[RFC6811]</dt>
+        <dd>
+<span class="refAuthor">Mohapatra, P.</span>, <span class="refAuthor">Scudder, J.</span>, <span class="refAuthor">Ward, D.</span>, <span class="refAuthor">Bush, R.</span>, and <span class="refAuthor">R. Austein</span>, <span class="refTitle">"BGP Prefix Origin Validation"</span>, <span class="seriesInfo">RFC 6811</span>, <span class="seriesInfo">DOI 10.17487/RFC6811</span>, <time datetime="2013-01" class="refDate">January 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6811">https://www.rfc-editor.org/info/rfc6811</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8704">[RFC8704]</dt>
+      <dd>
+<span class="refAuthor">Sriram, K.</span>, <span class="refAuthor">Montgomery, D.</span>, and <span class="refAuthor">J. Haas</span>, <span class="refTitle">"Enhanced Feasible-Path Unicast Reverse Path Forwarding"</span>, <span class="seriesInfo">BCP 84</span>, <span class="seriesInfo">RFC 8704</span>, <span class="seriesInfo">DOI 10.17487/RFC8704</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8704">https://www.rfc-editor.org/info/rfc8704</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC7454">[RFC7454]</dt>
+        <dd>
+<span class="refAuthor">Durand, J.</span>, <span class="refAuthor">Pepelnjak, I.</span>, and <span class="refAuthor">G. Doering</span>, <span class="refTitle">"BGP Operations and Security"</span>, <span class="seriesInfo">BCP 194</span>, <span class="seriesInfo">RFC 7454</span>, <span class="seriesInfo">DOI 10.17487/RFC7454</span>, <time datetime="2015-02" class="refDate">February 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7454">https://www.rfc-editor.org/info/rfc7454</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7908">[RFC7908]</dt>
+        <dd>
+<span class="refAuthor">Sriram, K.</span>, <span class="refAuthor">Montgomery, D.</span>, <span class="refAuthor">McPherson, D.</span>, <span class="refAuthor">Osterweil, E.</span>, and <span class="refAuthor">B. Dickson</span>, <span class="refTitle">"Problem Definition and Classification of BGP Route Leaks"</span>, <span class="seriesInfo">RFC 7908</span>, <span class="seriesInfo">DOI 10.17487/RFC7908</span>, <time datetime="2016-06" class="refDate">June 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7908">https://www.rfc-editor.org/info/rfc7908</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8210">[RFC8210]</dt>
+        <dd>
+<span class="refAuthor">Bush, R.</span> and <span class="refAuthor">R. Austein</span>, <span class="refTitle">"The Resource Public Key Infrastructure (RPKI) to Router Protocol, Version 1"</span>, <span class="seriesInfo">RFC 8210</span>, <span class="seriesInfo">DOI 10.17487/RFC8210</span>, <time datetime="2017-09" class="refDate">September 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8210">https://www.rfc-editor.org/info/rfc8210</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9234">[RFC9234]</dt>
+        <dd>
+<span class="refAuthor">Azimov, A.</span>, <span class="refAuthor">Bogomazov, E.</span>, <span class="refAuthor">Bush, R.</span>, <span class="refAuthor">Patel, K.</span>, and <span class="refAuthor">K. Sriram</span>, <span class="refTitle">"Route Leak Prevention and Detection Using Roles in UPDATE and OPEN Messages"</span>, <span class="seriesInfo">RFC 9234</span>, <span class="seriesInfo">DOI 10.17487/RFC9234</span>, <time datetime="2022-05" class="refDate">May 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9234">https://www.rfc-editor.org/info/rfc9234</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9286">[RFC9286]</dt>
+        <dd>
+<span class="refAuthor">Austein, R.</span>, <span class="refAuthor">Huston, G.</span>, <span class="refAuthor">Kent, S.</span>, and <span class="refAuthor">M. Lepinski</span>, <span class="refTitle">"Manifests for the Resource Public Key Infrastructure (RPKI)"</span>, <span class="seriesInfo">RFC 9286</span>, <span class="seriesInfo">DOI 10.17487/RFC9286</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9286">https://www.rfc-editor.org/info/rfc9286</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9319">[RFC9319]</dt>
+        <dd>
+<span class="refAuthor">Gilad, Y.</span>, <span class="refAuthor">Goldberg, S.</span>, <span class="refAuthor">Sriram, K.</span>, <span class="refAuthor">Snijders, J.</span>, and <span class="refAuthor">B. Maddison</span>, <span class="refTitle">"The Use of maxLength in the Resource Public Key Infrastructure (RPKI)"</span>, <span class="seriesInfo">BCP 185</span>, <span class="seriesInfo">RFC 9319</span>, <span class="seriesInfo">DOI 10.17487/RFC9319</span>, <time datetime="2022-10" class="refDate">October 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9319">https://www.rfc-editor.org/info/rfc9319</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-sidrops-aspa-profile">[I-D.ietf-sidrops-aspa-profile]</dt>
+        <dd>
+<span class="refAuthor">Azimov, A.</span>, <span class="refAuthor">Uskov, E.</span>, <span class="refAuthor">Bush, R.</span>, <span class="refAuthor">Snijders, J.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">B. Maddison</span>, <span class="refTitle">"A Profile for Autonomous System Provider Authorization"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-sidrops-aspa-profile-11</span>, <time datetime="2022-10-24" class="refDate">24 October 2022</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-profile-11.txt">https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-profile-11.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-sidrops-aspa-verification">[I-D.ietf-sidrops-aspa-verification]</dt>
+        <dd>
+<span class="refAuthor">Azimov, A.</span>, <span class="refAuthor">Bogomazov, E.</span>, <span class="refAuthor">Bush, R.</span>, <span class="refAuthor">Patel, K.</span>, <span class="refAuthor">Snijders, J.</span>, and <span class="refAuthor">K. Sriram</span>, <span class="refTitle">"BGP AS_PATH Verification Based on Resource Public Key Infrastructure (RPKI) Autonomous System Provider Authorization (ASPA) Objects"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-sidrops-aspa-verification-11</span>, <time datetime="2022-10-24" class="refDate">24 October 2022</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-verification-11.txt">https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-verification-11.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-grow-route-leak-detection-mitigation">[I-D.ietf-grow-route-leak-detection-mitigation]</dt>
+        <dd>
+<span class="refAuthor">Sriram, K.</span> and <span class="refAuthor">A. Azimov</span>, <span class="refTitle">"Methods for Detection and Mitigation of BGP Route Leaks"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-grow-route-leak-detection-mitigation-08</span>, <time datetime="2022-10-24" class="refDate">24 October 2022</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-ietf-grow-route-leak-detection-mitigation-08.txt">https://www.ietf.org/archive/id/draft-ietf-grow-route-leak-detection-mitigation-08.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-sidrops-8210bis">[I-D.ietf-sidrops-8210bis]</dt>
+        <dd>
+<span class="refAuthor">Bush, R.</span> and <span class="refAuthor">R. Austein</span>, <span class="refTitle">"The Resource Public Key Infrastructure (RPKI) to Router Protocol, Version 2"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-sidrops-8210bis-10</span>, <time datetime="2022-06-16" class="refDate">16 June 2022</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-ietf-sidrops-8210bis-10.txt">https://www.ietf.org/archive/id/draft-ietf-sidrops-8210bis-10.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="sriram1">[sriram1]</dt>
+        <dd>
+<span class="refAuthor">Sriram, K.</span> and <span class="refAuthor">J. Heitz</span>, <span class="refTitle">"On the Accuracy of Algorithms for ASPA Based Route Leak Detection"</span>, <span class="seriesInfo">IETF SIDROPS Meeting, Proceedings of the IETF 110, March 2021</span>, <span>&lt;<a href="https://datatracker.ietf.org/meeting/110/materials/slides-110-sidrops-sriram-aspa-alg-accuracy-01">https://datatracker.ietf.org/meeting/110/materials/slides-110-sidrops-sriram-aspa-alg-accuracy-01</a>&gt;</span>. </dd>
+<dd class="break"></dd><dt id="Monitor">[Monitor]</dt>
+        <dd>
+<span class="refTitle">"NIST RPKI Monitor"</span>, <span class="seriesInfo">National Institute of Standards and Technology, accessed June 2022</span>, <span>&lt;<a href="https://rpki-monitor.antd.nist.gov/">https://rpki-monitor.antd.nist.gov/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-800-189">[NIST-800-189]</dt>
+      <dd>
+<span class="refAuthor">Sriram, K.</span> and <span class="refAuthor">D. Montgomery</span>, <span class="refTitle">"Resilient Interdomain Traffic Exchange: BGP Security and DDoS Mitigation"</span>, <span class="seriesInfo">NIST Special Publication, NIST SP 800-189, December 2019</span>, <span>&lt;<a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-189.pdf">https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-189.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="Acknowledgements">
+<section id="appendix-A">
+      <h2 id="name-acknowledgements">
+<a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="appendix-A-1">The authors would like to thank Oliver Borchert, Job Snijders, Ben Maddison, and Geoff Huston for comments and discussion.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Kotikalapudi Sriram</span></div>
+<div dir="auto" class="left"><span class="org">USA National Institute of Standards and Technology</span></div>
+<div dir="auto" class="left"><span class="street-address">100 Bureau Drive</span></div>
+<div dir="auto" class="left">
+<span class="locality">Gaithersburg</span>, <span class="region">MD</span> <span class="postal-code">20899</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ksriram@nist.gov" class="email">ksriram@nist.gov</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Igor Lubashev</span></div>
+<div dir="auto" class="left"><span class="org">Akamai Technologies</span></div>
+<div dir="auto" class="left"><span class="street-address">145 Broadway</span></div>
+<div dir="auto" class="left">
+<span class="locality"> Cambridge </span>, <span class="region">MA</span> <span class="postal-code">02142</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:ilubashe@akamai.com" class="email">ilubashe@akamai.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Doug Montgomery</span></div>
+<div dir="auto" class="left"><span class="org">USA National Institute of Standards and Technology</span></div>
+<div dir="auto" class="left"><span class="street-address">100 Bureau Drive</span></div>
+<div dir="auto" class="left">
+<span class="locality">Gaithersburg</span>, <span class="region">MD</span> <span class="postal-code">20899</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:dougm@nist.gov" class="email">dougm@nist.gov</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,656 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2022-12-20T01:11:22.191210+00:00",
+  "repo": "igorlord/draft-sriram-sidrops-bar-sav",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 2,
+      "id": "I_kwDOH7q1Mc5RRy6h",
+      "title": "Extent of specifying validation ",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/issues/2",
+      "state": "CLOSED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [
+        "question"
+      ],
+      "body": "@ksriram25 comment: The general guidance regarding RPKI repository outage, MFT/CRL expiry, \r\n    staleness, etc. is that we should simply refer to the document where\r\n    guidance is already provided (e.g., rfc 9286) about such things. We should not paraphrase as that \r\n    can potentially distort things. If somethings need to be done differently in the ASPA context\r\n    in comparison to what has been stated in another RFC related to, say, ROA (as an example),\r\n    then we need to state that and state our reasons clearly.\r\n    Also, I think we need not state that we'll use MFTs, etc. even if they are stale.\r\n    The expiry time is 2 to 3 days out and the RPKI repository outage will rarely last more \r\n    than a few to several hours. ",
+      "createdAt": "2022-09-06T17:43:10Z",
+      "updatedAt": "2022-09-09T17:16:30Z",
+      "closedAt": "2022-09-09T17:16:30Z",
+      "comments": [
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "I agree that most of the cases we are covering here are very unlikely -- outages that last past expiration times of objects, local cache corruption, needed objects mysteriously disappearing from repositories. However, these are exactly the questions that SIDROPs was most concerned with. Implementations that neglect careful and thoughtful treatment of these black swan events cause significant disruptions when these events inevitably happen.\r\n\r\nSo I agree that we need not paraphrase details of RFC 9286 (although summarizing its overall behavior/purpose is a good style so the reader knows what they can find in RFC 9286). But we should highlight details that are not obvious from RFC 9286 and maybe extend beyond what RFC 9286 deals with (using expired objects when cache refreshes keep failing, and ignoring the objects is likely to result in an incident), when this is important to make applications robust against highly unlikely events.",
+          "createdAt": "2022-09-06T17:44:46Z",
+          "updatedAt": "2022-09-06T17:44:46Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think we can publish a v-01 at this point with the refined new sections. If improvements, especially in the implementation section, are needed, the WG will likely help us out (some people wanting to contribute and join as co-author).  If you can commit and add all the edits so far in the main, I'll take another look. \r\n ",
+          "createdAt": "2022-09-07T04:47:22Z",
+          "updatedAt": "2022-09-07T04:47:22Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "One follow-up comment about RPKI unreachability, etc. is as follows: at some point of time (e.g., perhaps when objects (say, MFTs) have expired and there is no refresh/restoration of RPKI, then we do the fail open thing, i.e., let go the BARSAV filter, say, by downgrading it to a simple 'loose uRPF' scheme which permits all prefixes that are in RIBs. In this, the bogons, unallocated, etc. prefixes are not included (i.e., filtered).    ",
+          "createdAt": "2022-09-07T04:54:23Z",
+          "updatedAt": "2022-09-07T04:54:23Z"
+        },
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "Updated fail open mode to use uRPF in #1 ",
+          "createdAt": "2022-09-07T14:27:19Z",
+          "updatedAt": "2022-09-07T14:27:19Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The update looks fine.",
+          "createdAt": "2022-09-09T17:16:30Z",
+          "updatedAt": "2022-09-09T17:16:30Z"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOH7q1Mc5RXHav",
+      "title": "validator MUST check expiration time...",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/issues/5",
+      "state": "CLOSED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "About: \"The validator MUST check expiration time of cryptographic objects when they are fetched from the repository before they are added to the local cache. \" \r\n\r\nThis applies to RAO/ROV also. It probably has been said elsewhere in another RFC. We can delete the whole paragraph, or we should cite the reference if we feel it is important to re-emphasize here. ",
+      "createdAt": "2022-09-07T18:05:41Z",
+      "updatedAt": "2022-09-09T14:27:47Z",
+      "closedAt": "2022-09-09T14:27:47Z",
+      "comments": [
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "Can you find an RFC that says so explicitly?  I would be great if this exists.\r\n\r\nI can see implementations possibly just copying files into the cache after verifying hashes, and the rest of the verification (cert expirations, CRL, etc) done later when the objects are used.",
+          "createdAt": "2022-09-07T18:54:53Z",
+          "updatedAt": "2022-09-07T18:54:53Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think we can leave the paragraph as is. We can try to find the reference (if there is one) and add it later in the next version.",
+          "createdAt": "2022-09-09T11:46:40Z",
+          "updatedAt": "2022-09-09T11:46:40Z"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOH7q1Mc5RXKi9",
+      "title": "delete \"Note that this applies...\"",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/issues/6",
+      "state": "CLOSED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "About: \"Note that this applies only in case of the unavailability of objects required for BAR-SAV computation.  Therefore, an implementation computing BAR-SAV filter SHOULD maintain and cache the most recent list of objects actually matched by BAR-SAV algorithm in computation of a SAV filter for each customer and peer interface.\"\r\n\r\nI feel we should delete the above. We started the paragraph by saying \"when cache is unavailable\" and now we say that we rely on the cache to keep track of things. How about we just comment this out for now; we can revisit later if needed?\r\n\r\n",
+      "createdAt": "2022-09-07T18:20:02Z",
+      "updatedAt": "2022-09-09T14:26:25Z",
+      "closedAt": "2022-09-09T14:26:25Z",
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOH7q1Mc5RcKwB",
+      "title": "Question about... consistency of RPKI repositories",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/issues/8",
+      "state": "CLOSED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "About: \"RPKI infrastructure does not guarantee continuous availability or consistency of RPKI repositories.\"\r\n\r\nWhat do we mean by lack of consistency? Is it carelessness on part of a user, e.g., creating a ROA for less specific and neglecting to create a RAO for more specific? Such things should not be blamed on RPKI repositories.\r\n\r\nUsually, we blame IRRs for inconsistencies due to the lack of authorization, quality control, and security. RPKI repositories are intended/designed to be trustworthy.\r\n\r\ns/RPKI infrastructure does not guarantee continuous availability or consistency of RPKI repositories. /RPKI infrastructure does not guarantee continuous availability. / \r\n\r\n ",
+      "createdAt": "2022-09-08T13:30:19Z",
+      "updatedAt": "2022-09-09T14:24:15Z",
+      "closedAt": "2022-09-09T14:24:15Z",
+      "comments": [
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "RFC9286 states that Relying Parties may be exposed to inconsistent contents of the repository and need to mitigate this.  This is likely to be caused by the lack of atomicity during repository updates, both on the part of the published and, more likely, on the part of the RP.\r\n\r\n> Repository operators MUST implement some form of repository update procedure that mitigates, _to the extent possible_, the risk that **RPs** that are performing retrieval operations on the repository **are exposed to inconsistent, transient, intermediate states** during updates to the repository publication point (directory) and the associated manifest.",
+          "createdAt": "2022-09-08T22:38:07Z",
+          "updatedAt": "2022-09-08T22:38:07Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I am OK now with leaving it as is the wording about consistency of RPKI. ",
+          "createdAt": "2022-09-09T11:23:59Z",
+          "updatedAt": "2022-09-09T11:23:59Z"
+        }
+      ]
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOH7q1Mc4-Uc6T",
+      "title": "Added Implementation Guidelines section",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/1",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-09-03T19:49:57Z",
+      "updatedAt": "2022-09-07T14:28:21Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "899b5ec5725a8cd20785c2ea4e369784c970a710",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igorlord/implementation-guidelines",
+      "headRefOid": "9529604b5ef5ef75e5f8b4a39bfe9c6e8417deb4",
+      "closedAt": "2022-09-07T14:28:15Z",
+      "mergedAt": "2022-09-07T14:28:15Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "be1bfc966da7a529a597a8b8ad30f5ed9fb6bc8c"
+      },
+      "comments": [
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "About: \"The validator MUST check expiration time of cached\t\r\n \t   cryptographic objects against the time when the local cache of the\t\r\n \t   repository was last successfully refreshed rather than the time when\t\r\n \t   the expiration check is performed.\"\r\n\r\nif the expiry time is stated as a date and time of day (e.g., UTC), then it need not be checked against anything. We need to find out if it says x hours or specifies an UTC time/date.  \r\n\r\n\r\n",
+          "createdAt": "2022-09-04T13:05:34Z",
+          "updatedAt": "2022-09-04T13:05:34Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "About: \"If the local cache of any repository required for BAR-SAV computation is unavailbale...\"\r\n\r\ndo you mean unavailable due to expired MFTS/CRLs? I think perhaps we need not comment about downtime of the local cache. Perhaps we assume it is available as long as the router is up and running. So, we speak of \"unavailable\" only in the sense of expired objects. No?\r\n\r\n",
+          "createdAt": "2022-09-04T13:12:51Z",
+          "updatedAt": "2022-09-04T13:12:51Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There are spelling errors like... unavailbale, Temporarelly, Missinfg, etc. You may like to copy the .txt into MS word and run a spelling/grammar check in the end.",
+          "createdAt": "2022-09-04T13:15:20Z",
+          "updatedAt": "2022-09-04T13:15:20Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In Section 6.2, we can add the following sentence in the middle (before the sentence that begins with 'Note that routing policies...'):\r\n\r\nIf there is full adoption of ASPA and ROA in the CC of interest, then the list of plausible source address prefixes will be complete with zero improper drop and improper admit.",
+          "createdAt": "2022-09-04T14:17:44Z",
+          "updatedAt": "2022-09-04T14:17:44Z"
+        },
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "@ksriram25 Next time, please, add a comment in the \"Files Changed\" view against the line you are commenting on. That way:\r\n1. You do not need to copy the text\r\n2. More importantly, we can have multiple discussion threads.",
+          "createdAt": "2022-09-06T02:24:50Z",
+          "updatedAt": "2022-09-06T02:24:50Z"
+        },
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "> About: \"If the local cache of any repository required for BAR-SAV computation is unavailbale...\"\r\n> \r\n> do you mean unavailable due to expired MFTS/CRLs? I think perhaps we need not comment about downtime of the local cache. Perhaps we assume it is available as long as the router is up and running. So, we speak of \"unavailable\" only in the sense of expired objects. No?\r\n\r\nMFTS/CRLs should not be allowed to *effectively* expire.  If you could not fetch the latest version from the repository, you just use the cached version, and if it was originally fetched unexpired, you can use the cached version forever.  But MFTS/CRLs is already expired as you have just fetched it from the repository, you SHOULD discard it and treat it as a failure to fetch -- so continue using the previously fetched version.  I'll add text about this.\r\n\r\nSo what I meant here is things like a local filesystem corruption that makes one of the repository cached unavailable.",
+          "createdAt": "2022-09-06T02:31:29Z",
+          "updatedAt": "2022-09-06T02:31:29Z"
+        },
+        {
+          "author": "dougm-nist",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I am not sure I completely follow what is being discussed  WRT BAR-SAV resilience to repository failures / RPKI object life times.\r\n\r\nWe should think carefully about effectively defining a variant version of the RPKI validation algorithm and the idea that a stale entry lasts forever.   I guess  we could be suggesting that it is not the actual X-509 validation algorithm we are changing but how the router manages the database after validation.   But even there we need to special case BAR-SAV semantics vs RPKI-ROV semantics.   \r\n\r\nStale entries that last forever historically have caused many problems in IRRs.    The fact that objects expire in the RPKI is a feature not a bug.\r\n",
+          "createdAt": "2022-09-06T15:53:05Z",
+          "updatedAt": "2022-09-06T15:53:05Z"
+        },
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "@dougm-nist Thanks for the feedback.  We are certainly defining not an update to X-509 validation but update to to cache management for SAV.  In fact, I kind of expect whatever we write here to be transplanted into its own draft before BAR-SAV is published as an RFC, because there are other users of RPKI that are likely to fail closed if the implementation is not careful enough.\r\n\r\nWe are addressing two \"lifetime extensions\" of objects:\r\n\r\n1. When a cache cannot be refreshed, continue to use whatever was valid when it was last refreshed.\r\n\r\n2. Continue to use an object whose certificate is still valid AND is not on the latest CRL, even if it somehow disappeared from the MFT.  This usage is pretty much allowed by RFC 9286 Section 6: \"files not listed on a manifest MAY be employed to validate other signed objects, if the profile of the object type explicitly states that such behavior is allowed (or required).\"",
+          "createdAt": "2022-09-06T16:22:32Z",
+          "updatedAt": "2022-09-06T16:23:22Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOH7q1Mc4-f1Fe",
+      "title": "CI setup fixes",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/3",
+      "state": "MERGED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I recently fouled up some of the actions files in the template.  This update should restore some performance that you would otherwise not benefit from.",
+      "createdAt": "2022-09-07T09:54:13Z",
+      "updatedAt": "2022-09-07T14:19:10Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "899b5ec5725a8cd20785c2ea4e369784c970a710",
+      "headRepository": "martinthomson/draft-sriram-sidrops-bar-sav",
+      "headRefName": "ci-fixes",
+      "headRefOid": "ac0e43d469112513b46cecefdd0d77f956dbf951",
+      "closedAt": "2022-09-07T14:19:10Z",
+      "mergedAt": "2022-09-07T14:19:10Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "1ee12984ca2103301a217b21294d56375b95946c"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOH7q1Mc4-hCil",
+      "title": "Proposed post on SIDROPS list",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/4",
+      "state": "CLOSED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Please review and edit.",
+      "createdAt": "2022-09-07T14:30:35Z",
+      "updatedAt": "2022-09-09T14:31:30Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "be1bfc966da7a529a597a8b8ad30f5ed9fb6bc8c",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "ksriram25-patch-1",
+      "headRefOid": "ad99f01f79c0ef52af8a9a40948a6781aeadb058",
+      "closedAt": "2022-09-09T14:31:29Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "This has been resolved via #11.  Generally Markdown is preferred as a rich media format, since it is automatically rendered by github and can be edited as text via collaboration tools.  (Office360 can edit Word files collaboratively, though,)",
+          "createdAt": "2022-09-09T14:31:29Z",
+          "updatedAt": "2022-09-09T14:31:29Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOH7q1Mc4-h80n",
+      "title": "a few new edits by KS",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/7",
+      "state": "MERGED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-09-07T18:23:42Z",
+      "updatedAt": "2022-09-07T18:51:34Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "be1bfc966da7a529a597a8b8ad30f5ed9fb6bc8c",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "ksriram25-patch-2",
+      "headRefOid": "5198c25a4459217e311ccff6106174ade2e98052",
+      "closedAt": "2022-09-07T18:51:29Z",
+      "mergedAt": "2022-09-07T18:51:29Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "63228f0f8f0c17f11535b02c0f611fd160eb28b0"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOH7q1Mc5Bi25L",
+          "commit": {
+            "abbreviatedOid": "5198c25"
+          },
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Looks good (made a few editorial changes).  I'll merge.",
+          "createdAt": "2022-09-07T18:51:14Z",
+          "updatedAt": "2022-09-07T18:51:14Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOH7q1Mc4-o7hT",
+      "title": "Removed extra complexity associated with unavailable cache, per #6",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/9",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "ksriram25"
+      ],
+      "labels": [],
+      "body": "Removed extra complexity associated with unavailable cache.\r\nResolves #6 ",
+      "createdAt": "2022-09-08T22:54:11Z",
+      "updatedAt": "2022-09-09T14:26:39Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "63228f0f8f0c17f11535b02c0f611fd160eb28b0",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igorlord/simplify-cache-unavailable",
+      "headRefOid": "c8c53eb47731ed2f4386efb689975b80273d61cf",
+      "closedAt": "2022-09-09T14:26:24Z",
+      "mergedAt": "2022-09-09T14:26:24Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "827087c1543f37c681d386938832dfb85be374ef"
+      },
+      "comments": [
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good.",
+          "createdAt": "2022-09-09T11:42:07Z",
+          "updatedAt": "2022-09-09T11:42:07Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOH7q1Mc4-pAs2",
+      "title": "Added Sriram's announcement version",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/10",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-09-08T23:34:36Z",
+      "updatedAt": "2022-09-08T23:56:50Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "63228f0f8f0c17f11535b02c0f611fd160eb28b0",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igorlord/draft-01-announcement-create",
+      "headRefOid": "61d9adadd7def5b52d6c91e01dddd0a0af36af9f",
+      "closedAt": "2022-09-08T23:56:42Z",
+      "mergedAt": "2022-09-08T23:56:42Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "6915249039c6127df6df598ac92c23d776ecc515"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOH7q1Mc4-pD7W",
+      "title": "Adding a charge to send us cases where SAV-only ROA is required",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/11",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [
+        "igorlord",
+        "ksriram25",
+        "dougm-nist"
+      ],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-09-09T00:03:34Z",
+      "updatedAt": "2022-09-09T18:17:42Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "6915249039c6127df6df598ac92c23d776ecc515",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igorlord/draft-01-announcement",
+      "headRefOid": "fe5331601690bc9557f812b0ab6cfc3b38448a20",
+      "closedAt": "2022-09-09T14:29:12Z",
+      "mergedAt": "2022-09-09T14:29:12Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "e4d4a992f09741313c33f56a3b9f64cfd0e49833"
+      },
+      "comments": [
+        {
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "body": "Resolves #4 ",
+          "createdAt": "2022-09-09T00:04:51Z",
+          "updatedAt": "2022-09-09T00:04:51Z"
+        },
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good.",
+          "createdAt": "2022-09-09T11:39:47Z",
+          "updatedAt": "2022-09-09T11:39:47Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 12,
+      "id": "PR_kwDOH7q1Mc4-setG",
+      "title": "minor edits by sriram",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/12",
+      "state": "MERGED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "version no. -01 (instead of latest). s/should/SHOULD/ where fail open is mentioned.",
+      "createdAt": "2022-09-09T17:42:48Z",
+      "updatedAt": "2022-09-09T18:14:44Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "e4d4a992f09741313c33f56a3b9f64cfd0e49833",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "ksriram25-patch-2",
+      "headRefOid": "b5a332dedba3275b53ca193c02e971792a3a5dba",
+      "closedAt": "2022-09-09T18:14:41Z",
+      "mergedAt": "2022-09-09T18:14:41Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "1ec842654c3e4318b13220d130e7f0c3f0cc3a52"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOH7q1Mc5BukjP",
+          "commit": {
+            "abbreviatedOid": "b5a332d"
+          },
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Looks good.",
+          "createdAt": "2022-09-09T18:14:35Z",
+          "updatedAt": "2022-09-09T18:14:35Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOH7q1Mc5Cb5nU",
+      "title": "Make sure we only use RPKI-ROV prefixes. Do not use invalid ones.",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/13",
+      "state": "OPEN",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-11-08T15:28:53Z",
+      "updatedAt": "2022-12-12T02:24:07Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "1ec842654c3e4318b13220d130e7f0c3f0cc3a52",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igor/rov",
+      "headRefOid": "f693f88dfabfff29f05278da91c127ccb4e2b40a",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 14,
+      "id": "PR_kwDOH7q1Mc5FDYCv",
+      "title": "Updates for IETF version -02",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/14",
+      "state": "MERGED",
+      "author": "ksriram25",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "1. Require RPKI-ROV validation of routes and ASPA-based validation of AS_PATHs prior to applying BAR-SAV procedures.\r\n2. Update RPKI cache management and ways of dealing with the repository unreachability, etc.",
+      "createdAt": "2022-12-11T03:50:47Z",
+      "updatedAt": "2022-12-12T02:34:08Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "1ec842654c3e4318b13220d130e7f0c3f0cc3a52",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "ksriram25-patch-2",
+      "headRefOid": "5178b2590f4e473048386650a8a311d837c87db0",
+      "closedAt": "2022-12-12T02:34:00Z",
+      "mergedAt": "2022-12-12T02:34:00Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "db3b6221ebdbf71372331d539803c0361279f799"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOH7q1Mc5ISlmW",
+          "commit": {
+            "abbreviatedOid": "5178b25"
+          },
+          "author": "igorlord",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "It is ok to start with merging this.  It does a lot:\r\n* Declare that BAR-SAV BGP input must be RPKI validated. This might miss a little bit of signal but is a simpler model (BAR-SAV does not need to do anything to avoid invalid BGP inferences).\r\n* Remove a recommendation to keep missing but unexpired objects in the cache (a recommendation from Job)\r\n* Remove a recommendation to keep expired objects in the cache if their RPKI publication point is unavailable. This needs to be discussed, since I cannot find a similar recommendation anywhere else.\r\n* Editorial changes",
+          "createdAt": "2022-12-12T02:30:34Z",
+          "updatedAt": "2022-12-12T02:30:34Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "PR_kwDOH7q1Mc5FIc_G",
+      "title": "Editorial cleanup",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/15",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Minor editorial cleanup",
+      "createdAt": "2022-12-12T02:40:18Z",
+      "updatedAt": "2022-12-14T01:43:24Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "db3b6221ebdbf71372331d539803c0361279f799",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igor/editorial-cleanup",
+      "headRefOid": "96228851e3132d30bf39c816f67fca092445c6a4",
+      "closedAt": "2022-12-14T01:43:24Z",
+      "mergedAt": "2022-12-14T01:43:24Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "214f48283a4f4177c4adc4cae3a91d9d25e578f9"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 16,
+      "id": "PR_kwDOH7q1Mc5Ft8fh",
+      "title": "Fix Igor's address",
+      "url": "https://github.com/igorlord/draft-sriram-sidrops-bar-sav/pull/16",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Fix address",
+      "createdAt": "2022-12-18T02:04:29Z",
+      "updatedAt": "2022-12-18T02:05:10Z",
+      "baseRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "214f48283a4f4177c4adc4cae3a91d9d25e578f9",
+      "headRepository": "igorlord/draft-sriram-sidrops-bar-sav",
+      "headRefName": "igor/fix-address",
+      "headRefOid": "58e804d9730b2d20edd52af77b0c5874aad5ea5f",
+      "closedAt": "2022-12-18T02:05:05Z",
+      "mergedAt": "2022-12-18T02:05:05Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "171d766615405405ce45030ddd7d857897c27572"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
