@@ -4,7 +4,7 @@ This is the working area for the individual Internet-Draft, "Source Address Vali
 
 * [Editor's Copy](https://igorlord.github.io/draft-ietf-sidrops-bar-sav/#go.draft-ietf-sidrops-bar-sav.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-sidrops-bar-sav)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-ietf-sidrops-bar-sav)
+* [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-ietf-sidrops-bar-sav)
 * [Compare Editor's Copy to Individual Draft](https://igorlord.github.io/draft-ietf-sidrops-bar-sav/#go.draft-ietf-sidrops-bar-sav.diff)
 
 
