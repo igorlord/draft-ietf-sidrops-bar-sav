@@ -2,16 +2,16 @@
 
 This is the working area for the individual Internet-Draft, "Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)".
 
-* [Editor's Copy](https://igorlord.github.io/draft-sriram-sidrops-bar-sav/#go.draft-sriram-sidrops-bar-sav.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-sriram-sidrops-bar-sav)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-sriram-sidrops-bar-sav)
-* [Compare Editor's Copy to Individual Draft](https://igorlord.github.io/draft-sriram-sidrops-bar-sav/#go.draft-sriram-sidrops-bar-sav.diff)
+* [Editor's Copy](https://igorlord.github.io/draft-ietf-sidrops-bar-sav/#go.draft-ietf-sidrops-bar-sav.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-sidrops-bar-sav)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-ietf-sidrops-bar-sav)
+* [Compare Editor's Copy to Individual Draft](https://igorlord.github.io/draft-ietf-sidrops-bar-sav/#go.draft-ietf-sidrops-bar-sav.diff)
 
 
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/igorlord/draft-sriram-sidrops-bar-sav/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/igorlord/draft-ietf-sidrops-bar-sav/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.

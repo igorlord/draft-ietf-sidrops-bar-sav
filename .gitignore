@@ -17,6 +17,7 @@
 /versioned/
 Gemfile.lock
 archive.json
+draft-ietf-sidrops-bar-sav.xml
 draft-sriram-sidrops-bar-sav.xml
 package-lock.json
 report.xml

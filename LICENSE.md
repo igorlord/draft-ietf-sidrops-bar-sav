@@ -1,4 +1,4 @@
 # License
 
 See the
-[guidelines for contributions](https://github.com/igorlord/draft-sriram-sidrops-bar-sav/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/igorlord/draft-ietf-sidrops-bar-sav/blob/main/CONTRIBUTING.md).
