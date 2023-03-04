@@ -6,13 +6,13 @@ Internet Engineering Task Force (IETF)                         K. Sriram
 Internet-Draft                                                  USA NIST
 Updates: 8704 (if approved)                                  I. Lubashev
 Intended status: Best Current Practice                            Akamai
-Expires: 21 June 2023                                      D. Montgomery
+Expires: 5 September 2023                                  D. Montgomery
                                                                 USA NIST
-                                                        18 December 2022
+                                                            4 March 2023
 
 
   Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)
-                  draft-sriram-sidrops-bar-sav-latest
+                   draft-ietf-sidrops-bar-sav-latest
 
 Abstract
 
@@ -24,7 +24,7 @@ Abstract
    Provider Authorization (ASPA), and Route Origin Authorization (ROA).
    The proposed method's name is abbreviated as BAR-SAV.  BAR-SAV can be
    used by network operators to derive more robust SAV filters and thus
-   improve network resilience.
+   improve network resilience.  This document updates RFC8704.
 
 Status of This Memo
 
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 June 2023.
+   This Internet-Draft will expire on 5 September 2023.
 
 Copyright Notice
 
-   Copyright (c) 2022 IETF Trust and the persons identified as the
+   Copyright (c) 2023 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -340,12 +340,12 @@ Table of Contents
    need to happen directly from the Edge Server to the User with an
    anycast source address (a P3 address).
 
-                    +----------+   P3[AS5 AS3]  +------------+
+                    +----------+   P3{AS5 AS3}  +------------+
                     |    AS4   |<---------------|     AS5    |
                     +----------+      (P2P)     +------------+
                         /\   /\                        /\
                         /     \                         \
-                P1[AS1]/       \P2[AS2]                  \P3[AS3]
+                P1{AS1}/       \P2{AS2}                  \P3{AS3}
                  (C2P)/         \(C2P)                    \(C2P)
                      /           \                         \
               +----------+    +----------+           +----------+
@@ -355,7 +355,7 @@ Table of Contents
                   User       Edge Server (DSR)      Anycast Server
 
              Consider AS4 generating SAV list for interface to AS2:
-             CDN's ROAs: {P3 AS3}, {P3, AS2}, {P2, AS2}
+             CDN's ROAs: {P3, AS3}, {P3, AS2}, {P2, AS2}
              AS2 should not/does not announce P3
              With the SAV methods in this document,
                 AS4 correctly includes P2 and P3 in the SAV list
@@ -530,10 +530,6 @@ Table of Contents
               DOI 10.17487/RFC4271, January 2006,
               <https://www.rfc-editor.org/info/rfc4271>.
 
-   [RFC6480]  Lepinski, M. and S. Kent, "An Infrastructure to Support
-              Secure Internet Routing", RFC 6480, DOI 10.17487/RFC6480,
-              February 2012, <https://www.rfc-editor.org/info/rfc6480>.
-
    [RFC6482]  Lepinski, M., Kent, S., and D. Kong, "A Profile for Route
               Origin Authorizations (ROAs)", RFC 6482,
               DOI 10.17487/RFC6482, February 2012,
@@ -554,6 +550,10 @@ Table of Contents
               <https://www.rfc-editor.org/info/rfc8704>.
 
 9.2.  Informative References
+
+   [RFC6480]  Lepinski, M. and S. Kent, "An Infrastructure to Support
+              Secure Internet Routing", RFC 6480, DOI 10.17487/RFC6480,
+              February 2012, <https://www.rfc-editor.org/info/rfc6480>.
 
    [RFC7454]  Durand, J., Pepelnjak, I., and G. Doering, "BGP Operations
               and Security", BCP 194, RFC 7454, DOI 10.17487/RFC7454,
@@ -590,9 +590,9 @@ Table of Contents
               Azimov, A., Uskov, E., Bush, R., Snijders, J., Housley,
               R., and B. Maddison, "A Profile for Autonomous System
               Provider Authorization", Work in Progress, Internet-Draft,
-              draft-ietf-sidrops-aspa-profile-11, 24 October 2022,
-              <https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-
-              profile-11.txt>.
+              draft-ietf-sidrops-aspa-profile-12, 29 January 2023,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-sidrops-
+              aspa-profile-12>.
 
    [I-D.ietf-sidrops-aspa-verification]
               Azimov, A., Bogomazov, E., Bush, R., Patel, K., Snijders,
@@ -601,23 +601,23 @@ Table of Contents
               System Provider Authorization (ASPA) Objects", Work in
               Progress, Internet-Draft, draft-ietf-sidrops-aspa-
               verification-11, 24 October 2022,
-              <https://www.ietf.org/archive/id/draft-ietf-sidrops-aspa-
-              verification-11.txt>.
+              <https://datatracker.ietf.org/doc/html/draft-ietf-sidrops-
+              aspa-verification-11>.
 
    [I-D.ietf-grow-route-leak-detection-mitigation]
               Sriram, K. and A. Azimov, "Methods for Detection and
               Mitigation of BGP Route Leaks", Work in Progress,
               Internet-Draft, draft-ietf-grow-route-leak-detection-
               mitigation-08, 24 October 2022,
-              <https://www.ietf.org/archive/id/draft-ietf-grow-route-
-              leak-detection-mitigation-08.txt>.
+              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
+              route-leak-detection-mitigation-08>.
 
    [I-D.ietf-sidrops-8210bis]
               Bush, R. and R. Austein, "The Resource Public Key
               Infrastructure (RPKI) to Router Protocol, Version 2", Work
               in Progress, Internet-Draft, draft-ietf-sidrops-8210bis-
-              10, 16 June 2022, <https://www.ietf.org/archive/id/draft-
-              ietf-sidrops-8210bis-10.txt>.
+              10, 16 June 2022, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-sidrops-8210bis-10>.
 
    [sriram1]  Sriram, K. and J. Heitz, "On the Accuracy of Algorithms
               for ASPA Based Route Leak Detection", IETF SIDROPS
@@ -639,7 +639,8 @@ Table of Contents
 Acknowledgements
 
    The authors would like to thank Oliver Borchert, Job Snijders, Ben
-   Maddison, and Geoff Huston for comments and discussion.
+   Maddison, Geoff Huston, Dan Li, and many other members of the SIDROPS
+   and SAVNET working groups for comments and discussion.
 
 Authors' Addresses
 
