@@ -23,7 +23,7 @@
 <rfc
   xmlns:xi="http://www.w3.org/2001/XInclude"
   category="bcp"
-  docName="draft-sriram-sidrops-bar-sav-latest"
+  docName="draft-ietf-sidrops-bar-sav-00"
 
   ipr="trust200902"
   obsoletes=""
@@ -42,9 +42,12 @@
 
   <front>
     <title abbrev="BAR-SAV">Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)</title>
-<!--    <title abbrev="SAV using ASPA, ROA">Source Address Validation Using ASPA, ROA, and BGP UPDATE Messages</title> -->
 
-    <seriesInfo name="Internet-Draft" value="draft-sriram-sidrops-sav-using-aspa-roa"/>
+<!--    <title abbrev="SAV using ASPA, ROA">Source Address Validation Using ASPA, ROA, and BGP UPDATE Messages</title> 
+    <seriesInfo name="Internet-Draft" value="draft-sriram-sidrops-sav-using-aspa-roa"/>  -->  
+
+	<seriesInfo name="Internet-Draft" value="draft-ietf-sidrops-bar-sav"/>
+
 
     <author fullname="Kotikalapudi Sriram" initials="K." surname="Sriram">
       <organization abbrev="USA NIST">USA National Institute of Standards and Technology</organization>
@@ -109,7 +112,7 @@
 
     <abstract>
       <t>
-Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding dropping legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
+Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding dropping legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience. This document updates RFC8704.
       </t>
     </abstract>
 
@@ -334,12 +337,12 @@ For example, in <xref target="fig1"/>, the CDN announces an anycast prefix P3 (f
         <figure anchor="fig1" align="left" suppress-title="false" pn="figure-1">
           <name slugifiedName="DSR-illustration">Illustration of how the solution functions for the CDN/DSR scenario.</name>
           <artwork align="left" name="" type="" alt="">
-                 +----------+   P3[AS5 AS3]  +------------+
+                 +----------+   P3{AS5 AS3}  +------------+
                  |    AS4   |&lt;---------------|     AS5    |
                  +----------+      (P2P)     +------------+
                      /\   /\                        /\
                      /     \                         \
-             P1[AS1]/       \P2[AS2]                  \P3[AS3]
+             P1{AS1}/       \P2{AS2}                  \P3{AS3}
               (C2P)/         \(C2P)                    \(C2P)
                   /           \                         \
            +----------+    +----------+           +----------+
@@ -349,7 +352,7 @@ For example, in <xref target="fig1"/>, the CDN announces an anycast prefix P3 (f
                User       Edge Server (DSR)      Anycast Server
 
           Consider AS4 generating SAV list for interface to AS2:
-          CDN's ROAs: {P3 AS3}, {P3, AS2}, {P2, AS2}
+          CDN's ROAs: {P3, AS3}, {P3, AS2}, {P2, AS2}
           AS2 should not/does not announce P3
           With the SAV methods in this document,
              AS4 correctly includes P2 and P3 in the SAV list
@@ -480,7 +483,6 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.2119.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.3704.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.4271.xml"/>
-        <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.6480.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.6482.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.6811.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8174.xml"/>
@@ -490,7 +492,7 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
 
       <references>
         <name>Informative References</name>
-
+        <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.6480.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.7454.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.7908.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8210.xml"/>
@@ -550,7 +552,7 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
 
     <section anchor="Acknowledgements" numbered="false">
       <name>Acknowledgements</name>
-      <t>The authors would like to thank Oliver Borchert, Job Snijders, Ben Maddison, and Geoff Huston for comments and discussion. </t>
+      <t>The authors would like to thank Oliver Borchert, Job Snijders, Ben Maddison, Geoff Huston, Dan Li, and many other members of the SIDROPS and SAVNET working groups for comments and discussion. </t>
     </section>
 <!--
     <section anchor="Contributors" numbered="false">
