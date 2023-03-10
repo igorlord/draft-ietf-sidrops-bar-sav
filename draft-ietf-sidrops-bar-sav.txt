@@ -6,9 +6,9 @@ Internet Engineering Task Force (IETF)                         K. Sriram
 Internet-Draft                                                  USA NIST
 Updates: 8704 (if approved)                                  I. Lubashev
 Intended status: Best Current Practice                            Akamai
-Expires: 5 September 2023                                  D. Montgomery
+Expires: 11 September 2023                                 D. Montgomery
                                                                 USA NIST
-                                                            4 March 2023
+                                                           10 March 2023
 
 
   Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)
@@ -17,7 +17,7 @@ Expires: 5 September 2023                                  D. Montgomery
 Abstract
 
    Designing an efficient source address validation (SAV) filter
-   requires minimizing false positives (i.e., avoiding dropping
+   requires minimizing false positives (i.e., avoiding blocking
    legitimate traffic) while maintaining directionality (see RFC8704).
    This document advances the technology for SAV filter design through a
    method that makes use of BGP UPDATE messages, Autonomous System
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 September 2023.
+   This Internet-Draft will expire on 11 September 2023.
 
 Copyright Notice
 
@@ -89,7 +89,7 @@ Table of Contents
    BCP 84 [RFC3704] [RFC8704]).  A detailed review of unicast Reverse
    Path Forwarding (uRPF) techniques for SAV is provided in [RFC8704]).
    Also, [RFC8704] describes enhanced feasible-path uRPF (EFP-uRPF)
-   methods that aim to minimize false positives (i.e., avoid dropping
+   methods that aim to minimize false positives (i.e., avoid blocking
    legitimate traffic) while maintaining directionality (see definitions
    in [RFC3704]).
 
@@ -424,9 +424,9 @@ Table of Contents
    the ASes in the CC.  If ASPA and ROA have been adopted by all ASes
    and prefix owners, respectively, in the CC of interest, then the list
    of plausible source address prefixes will be complete with no
-   improper drops (i.e., traffic with legitimate source addresses is not
-   dropped).  Further, deploying BAR-SAV by all ASes within the CC
-   ensures no improper admits (i.e., traffic with spoofed source address
+   improper block (i.e., traffic with legitimate source addresses is not
+   blocked).  Further, deploying BAR-SAV by all ASes within the CC
+   ensures no improper permit (i.e., traffic with spoofed source address
    is not admitted).  Note that routing policies of ASes may be such
    that some of the discovered prefixes may never be used as source
    addresses on a given customer interface of interest, but this does
@@ -454,7 +454,7 @@ Table of Contents
    such as BAR-SAV, however, allow for easy, accurate, and cost
    effective deployments.  The BAR-SAV method makes it possible to
    automate the construction of SAV filter lists aiming for no improper
-   drops and a minimal probability of improper admit of data traffic.
+   block and a minimal probability of improper permit of data traffic.
    As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-
    SAV's accuracy of discovering all possible source addresses
    (prefixes) for the customer cone of interest improves even further in
@@ -463,7 +463,7 @@ Table of Contents
 6.5.  Implementation Guidelines
 
    When a SAV filter is used to police data traffic, and an incomplete
-   SAV filter list could cause legitimate traffic to be dropped, the use
+   SAV filter list could cause legitimate traffic to be blocked, the use
    of robust implementation practices for RPKI data retrieval and cache
    management practices become paramount.  Some of such recommended
    practices are discussed in this section.
