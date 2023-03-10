@@ -112,7 +112,7 @@
 
     <abstract>
       <t>
-Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding dropping legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience. This document updates RFC8704.
+Designing an efficient source address validation (SAV) filter requires minimizing false positives (i.e., avoiding blocking legitimate traffic) while maintaining directionality (see RFC8704). This document advances the technology for SAV filter design through a method that makes use of BGP UPDATE messages, Autonomous System Provider Authorization (ASPA), and Route Origin Authorization (ROA). The proposed method's name is abbreviated as BAR-SAV. BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience. This document updates RFC8704.
       </t>
     </abstract>
 
@@ -124,7 +124,7 @@ Designing an efficient source address validation (SAV) filter requires minimizin
       <name>Introduction</name>
       <t>
 
-Spoofed source addresses are often used in Denial of Service (DoS) and Distributed DoS (DDoS) attacks. Source address validation (SAV) filtering is used to drop packets with spoofed source addresses (see BCP&nbsp;84 <xref target="RFC3704"/> <xref target="RFC8704"/>). A detailed review of unicast Reverse Path Forwarding (uRPF) techniques for SAV is provided in <xref target="RFC8704"/>). Also, <xref target="RFC8704"/> describes enhanced feasible-path uRPF (EFP-uRPF) methods that aim to minimize false positives (i.e., avoid dropping legitimate traffic) while maintaining directionality (see definitions in <xref target="RFC3704"/>).
+Spoofed source addresses are often used in Denial of Service (DoS) and Distributed DoS (DDoS) attacks. Source address validation (SAV) filtering is used to drop packets with spoofed source addresses (see BCP&nbsp;84 <xref target="RFC3704"/> <xref target="RFC8704"/>). A detailed review of unicast Reverse Path Forwarding (uRPF) techniques for SAV is provided in <xref target="RFC8704"/>). Also, <xref target="RFC8704"/> describes enhanced feasible-path uRPF (EFP-uRPF) methods that aim to minimize false positives (i.e., avoid blocking legitimate traffic) while maintaining directionality (see definitions in <xref target="RFC3704"/>).
 
       </t>
       <t>
@@ -397,7 +397,7 @@ If a prefix is used for source addresses for hosts attached at an AS but not ann
     </section>
     <section title="BAR-SAV and Routing Policy" anchor="routing-policy">
       <t>
-BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper drops (i.e., traffic with legitimate source addresses is not dropped). Further, deploying BAR-SAV by all ASes within the CC ensures no improper admits (i.e., traffic with spoofed source address is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
+BAR-SAV identifies all ASes in a customer's (or lateral peer's) customer cone (CC), and then it discovers all prefixes that could plausibly be used as source addresses in data traffic originated from the ASes in the CC. If ASPA and ROA have been adopted by all ASes and prefix owners, respectively, in the CC of interest, then the list of plausible source address prefixes will be complete with no improper block (i.e., traffic with legitimate source addresses is not blocked). Further, deploying BAR-SAV by all ASes within the CC ensures no improper permit (i.e., traffic with spoofed source address is not admitted). Note that routing policies of ASes may be such that some of the discovered prefixes may never be used as source addresses on a given customer interface of interest, but this does not impact BAR-SAV's accuracy.
       </t>
     </section>
 
@@ -409,7 +409,7 @@ The discussion in Section 3.6.1 of <xref target="RFC8704"/> of the Forwarding In
 
     <section title="Automation is the Key" anchor="auto">
       <t>
-SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists aiming for no improper drops and a minimal probability of improper admit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex scenarios.
+SAV done manually, e.g., using ACLs, usually does not get much adoption because of operational costs, susceptibility to human errors, and tendency of SAV filters to get out of date due to the need for any changes by customers or peers to be coordinated with multiple parties (providers and peers). Automated uRPF technique, such as BAR-SAV, however, allow for easy, accurate, and cost effective deployments. The BAR-SAV method makes it possible to automate the construction of SAV filter lists aiming for no improper block and a minimal probability of improper permit of data traffic. As ASPA adoption picks up alongside the ongoing ROA adoption, BAR-SAV's accuracy of discovering all possible source addresses (prefixes) for the customer cone of interest improves even further in complex scenarios.
       </t>
     </section>
 
@@ -426,7 +426,7 @@ SAV done manually, e.g., using ACLs, usually does not get much adoption because 
     than a few to several hours.
     -->
       <t>
-When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be dropped, the use of robust implementation practices for RPKI data retrieval and cache management practices become paramount. Some of such recommended practices are discussed in this section.
+When a SAV filter is used to police data traffic, and an incomplete SAV filter list could cause legitimate traffic to be blocked, the use of robust implementation practices for RPKI data retrieval and cache management practices become paramount. Some of such recommended practices are discussed in this section.
       </t>
 
     <section title="Management of Local RPKI Repository Caches" anchor="local-caches">
@@ -449,7 +449,7 @@ If the local cache of some repository objects required for BAR-SAV computation i
 
     <section title="Management of Objects Temporarily Missing from RPKI Repositories" anchor="missing-objects">
       <t>
-It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive rather than too restrictive (which causes improper drops), BAR-SAV implementations MAY continue to cache unexpired objects that are no longer listed in MFTs after a successful fetch operation. Such retained objects MUST still be validated against CRLs. An implementation MAY chose to use such cached objects only for SAV list construction and not for routing authorization. If an implementation chooses to keep such cached objects, it MUST re-validate their expiration time after each successful fetch operation.
+It is possible for an RPKI signed object to be temporarily missing from the repository as the owner is updating the object's information. Since it is better for a SAV filter to be too permissive rather than too restrictive (which causes improper block), BAR-SAV implementations MAY continue to cache unexpired objects that are no longer listed in MFTs after a successful fetch operation. Such retained objects MUST still be validated against CRLs. An implementation MAY chose to use such cached objects only for SAV list construction and not for routing authorization. If an implementation chooses to keep such cached objects, it MUST re-validate their expiration time after each successful fetch operation.
       </t>
     </section>
 -->
