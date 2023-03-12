@@ -116,8 +116,8 @@ Table of Contents
    design the SAV filter.  This method is for use in the future when the
    adoption of ROA and ASPA is considered to be ubiquitous.  However,
    for use in the period before that, another method for SAV is
-   presented in Section 4 that makes complementary use of *B*GP UPDATE
-   messages along with *A*SPA and *R*OA data.  Accordingly, the latter
+   presented in Section 4 that makes complementary use of BGP UPDATE
+   messages along with ASPA and ROA data.  Accordingly, the latter
    method's name is abbreviated as BAR-SAV.  It is hoped that just as
    the adoption of ROAs is growing at present [Monitor], the adoption of
    ASPA will also gain momentum in the near future.  The BAR-SAV method
@@ -205,14 +205,14 @@ Table of Contents
 
 4.  SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)
 
-   SAV using *B*GP UPDATE Messages, *A*SPA, *R*OA (BAR-SAV) as well as
-   ACLs is described in this section and is meant for the period when
-   there is a partial deployment of ROAs and ASPAs.  To compensate for
-   incomplete RPKI information, BAR-SAV augments ASPA data with BGP
-   UPDATE AS_PATH data (and ASN ACLs) for discovering CC ASes, and it
-   augments ROA data with BGP UPDATE data (and Prefix ACLs) for
-   discovering all prefixes associated with ASes in the CC.  The details
-   of this procedure are described below.
+   SAV using BGP UPDATE Messages, ASPA, ROA (BAR-SAV) as well as ACLs is
+   described in this section and is meant for the period when there is a
+   partial deployment of ROAs and ASPAs.  To compensate for incomplete
+   RPKI information, BAR-SAV augments ASPA data with BGP UPDATE AS_PATH
+   data (and ASN ACLs) for discovering CC ASes, and it augments ROA data
+   with BGP UPDATE data (and Prefix ACLs) for discovering all prefixes
+   associated with ASes in the CC.  The details of this procedure are
+   described below.
 
    BAR-SAV additionally incorporates a refined version of Algorithm A of
    EFP-uRPF (Section 3.1 of [RFC8704]).  Algorithm A in [RFC8704] picked
@@ -296,9 +296,9 @@ Table of Contents
         of all prefixes originated by any ASN in AS-set D.  Name this
         set of prefixes as Prefix-set P2.
 
-   12.  Form the union of Prefix-sets P1 and P2 and any Prefix ACL
-        configured for this interface.  Apply this union set as the list
-        of permissible prefixes for SAV.
+   12.  Form the union of Prefix-set P1, Prefix-set P2, and any Prefix
+        ACL configured for this interface.  Apply this union set as the
+        list of permissible prefixes for SAV.
 
 5.  Operational Recommendations
 
