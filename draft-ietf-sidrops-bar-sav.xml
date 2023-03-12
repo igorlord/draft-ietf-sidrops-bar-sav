@@ -138,7 +138,7 @@ An ASPA is a cryptographically signed attestation by an AS listing its transit p
       </t>
       <t>
 
-This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <xref target="method1"/> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is considered to be ubiquitous. However, for use in the period before that, another method for SAV is presented in <xref target="method2"/> that makes complementary use of <strong>B</strong>GP UPDATE messages along with <strong>A</strong>SPA and <strong>R</strong>OA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is hoped that just as the adoption of ROAs is growing at present <xref target="Monitor"/>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <xref target="RFC8704"/>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
+This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <xref target="method1"/> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is considered to be ubiquitous. However, for use in the period before that, another method for SAV is presented in <xref target="method2"/> that makes complementary use of BGP UPDATE messages along with ASPA and ROA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is hoped that just as the adoption of ROAs is growing at present <xref target="Monitor"/>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <xref target="RFC8704"/>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
       </t>
     <t>
 The focus of this document is on the design of ingress SAV filters for an interface facing a customer or lateral peer AS. The same procedure applies in both cases (<xref target="observe"/>).
@@ -218,7 +218,7 @@ A detailed description of Procedure X is as follows:
         <name>SAV using BGP UPDATE Messages, ASPA, and ROA (BAR-SAV)</name>
 
       <t>
-SAV using <strong>B</strong>GP UPDATE Messages, <strong>A</strong>SPA, <strong>R</strong>OA (BAR-SAV) as well as ACLs is described in this section and is meant for the period when there is a partial deployment of ROAs and ASPAs. To compensate for incomplete RPKI information, BAR-SAV augments ASPA data with BGP UPDATE AS_PATH data (and ASN ACLs) for discovering CC ASes, and it augments ROA data with BGP UPDATE data (and Prefix ACLs) for discovering all prefixes associated with ASes in the CC.  The details of this procedure are described below.
+SAV using BGP UPDATE Messages, ASPA, ROA (BAR-SAV) as well as ACLs is described in this section and is meant for the period when there is a partial deployment of ROAs and ASPAs. To compensate for incomplete RPKI information, BAR-SAV augments ASPA data with BGP UPDATE AS_PATH data (and ASN ACLs) for discovering CC ASes, and it augments ROA data with BGP UPDATE data (and Prefix ACLs) for discovering all prefixes associated with ASes in the CC.  The details of this procedure are described below.
       </t>
       <t>
 
@@ -307,7 +307,7 @@ A detailed description of the BAR-SAV procedure is as follows:
 <li> Form the union of the AS-sets, Z(i), i = 1, 2, ..., i_max, and name this union as AS-set D. </li>
 <li> Select all ROAs in which the authorized origin ASN is in AS-set D. Form the union of the sets of prefixes listed in the selected ROAs. Name this union set of prefixes as Prefix-set P1. </li>
 <li> Using the routes in Adj-RIBs-In of all interfaces, create a list of all prefixes originated by any ASN in AS-set D. Name this set of prefixes as Prefix-set P2. </li>
-<li> Form the union of Prefix-sets P1 and P2 and any Prefix ACL configured for this interface. Apply this union set as the list of permissible prefixes for SAV. </li>
+<li> Form the union of Prefix-set P1, Prefix-set P2, and any Prefix ACL configured for this interface. Apply this union set as the list of permissible prefixes for SAV. </li>
 </ol>
     </section>
 
