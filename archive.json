@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-03-05T01:26:01.694389+00:00",
+  "timestamp": "2023-03-12T01:18:45.008092+00:00",
   "repo": "igorlord/draft-ietf-sidrops-bar-sav",
   "labels": [
     {
@@ -784,6 +784,76 @@
         "oid": "72498d073369c6f5a2a011881fac67c3c01ea39a"
       },
       "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOH7q1Mc5LyTdQ",
+      "title": "Update terminology: drop->block; admit->permit",
+      "url": "https://github.com/igorlord/draft-ietf-sidrops-bar-sav/pull/21",
+      "state": "MERGED",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2023-03-10T17:24:59Z",
+      "updatedAt": "2023-03-10T19:26:41Z",
+      "baseRepository": "igorlord/draft-ietf-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "72498d073369c6f5a2a011881fac67c3c01ea39a",
+      "headRepository": "igorlord/draft-ietf-sidrops-bar-sav",
+      "headRefName": "igorlord/update-to-savnet-teminology",
+      "headRefOid": "1b161a4110b47c602805ffd459f9843125f3d1a6",
+      "closedAt": "2023-03-10T19:26:37Z",
+      "mergedAt": "2023-03-10T19:26:37Z",
+      "mergedBy": "igorlord",
+      "mergeCommit": {
+        "oid": "b5dfd7d48ad6b95278bd028a9b27f7c47795d018"
+      },
+      "comments": [
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I agree with the terminology updates. ",
+          "createdAt": "2023-03-10T17:48:42Z",
+          "updatedAt": "2023-03-10T17:48:42Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 22,
+      "id": "PR_kwDOH7q1Mc5Lzqfi",
+      "title": "Add text about ASN and Prefix ACLs",
+      "url": "https://github.com/igorlord/draft-ietf-sidrops-bar-sav/pull/22",
+      "state": "OPEN",
+      "author": "igorlord",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2023-03-10T23:22:10Z",
+      "updatedAt": "2023-03-12T00:48:14Z",
+      "baseRepository": "igorlord/draft-ietf-sidrops-bar-sav",
+      "baseRefName": "main",
+      "baseRefOid": "b5dfd7d48ad6b95278bd028a9b27f7c47795d018",
+      "headRepository": "igorlord/draft-ietf-sidrops-bar-sav",
+      "headRefName": "igorlord/allow-manual",
+      "headRefOid": "e671630c2599829dc3a360fc5b5faab2200ce20b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "ksriram25",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I reviewed and approve the changes.",
+          "createdAt": "2023-03-12T00:48:14Z",
+          "updatedAt": "2023-03-12T00:48:14Z"
+        }
+      ],
       "reviews": []
     }
   ]
