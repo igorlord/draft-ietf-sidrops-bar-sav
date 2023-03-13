@@ -461,7 +461,7 @@ It is possible for an RPKI signed object to be temporarily missing from the repo
 
     <section anchor="Provider">
       <name>Provider Interfaces</name>
-      <t>For most networks, "loose uRPF" SAV mode described in <xref target="RFC3704"/> and <xref target="RFC8704"/> is the current best practice for provider interfaces to ensure no improper block. It may be possible to use BGP UPDATE as well as RPKI ROA and ASPA data to compute a list of prefixes that originate exclusively within the customer code and will only be received by the AS on customer interfaces. A set of such prefixes can be used in conjuction with "loose uRPF" SAV mode as a blocklist on provider interfaces.
+      <t>For most networks, "loose uRPF" SAV mode described in <xref target="RFC3704"/> and <xref target="RFC8704"/> is the current best practice for provider interfaces to ensure no improper block. It may be possible to use BGP UPDATE as well as RPKI ROA and ASPA data to compute a list of prefixes that originate exclusively within the customer cone and should only be received by the AS on customer interfaces. A set of such prefixes can be used in conjuction with "loose uRPF" SAV mode as a blocklist on provider interfaces.
       </t>
     </section>
 
