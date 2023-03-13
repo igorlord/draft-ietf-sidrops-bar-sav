@@ -141,7 +141,7 @@ An ASPA is a cryptographically signed attestation by an AS listing its transit p
 This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <xref target="method1"/> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is considered to be ubiquitous. However, for use in the period before that, another method for SAV is presented in <xref target="method2"/> that makes complementary use of BGP UPDATE messages along with ASPA and ROA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is hoped that just as the adoption of ROAs is growing at present <xref target="Monitor"/>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <xref target="RFC8704"/>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
       </t>
     <t>
-The focus of this document is on the design of ingress SAV filters for an interface facing a customer or lateral peer AS. The same procedure applies in both cases (<xref target="observe"/>).
+The focus of this document is on the design of ingress SAV allowlist filters for an interface facing a customer or lateral peer AS. The same procedure applies in both cases (<xref target="observe"/>).
       </t>
     <t>
 Throughout this document, ROA and ASPA data mean the payload data in cryptographically valid ROA and ASPA objects (see Section 4 in <xref target="RFC6482"/> and Section 4 in <xref target="I-D.ietf-sidrops-aspa-profile"/>).
@@ -457,6 +457,12 @@ It is possible for an RPKI signed object to be temporarily missing from the repo
 
     </section>
 
+    </section>
+
+    <section anchor="Provider">
+      <name>Provider Interfaces</name>
+      <t>For most networks, "loose uRPF" SAV mode described in <xref target="RFC3704"/> and <xref target="RFC8704"/> is the current best practice for provider interfaces to ensure no improper block. It may be possible to use BGP UPDATE as well as RPKI ROA and ASPA data to compute a list of prefixes that originate exclusively within the customer cone and should only be received by the AS on customer interfaces. A set of such prefixes can be used in conjuction with "loose uRPF" SAV mode as a blocklist on provider interfaces.
+      </t>
     </section>
 
     <section anchor="IANA">
