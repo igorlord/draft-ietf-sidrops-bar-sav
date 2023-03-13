@@ -6,9 +6,9 @@ Internet Engineering Task Force (IETF)                         K. Sriram
 Internet-Draft                                                  USA NIST
 Updates: 8704 (if approved)                                  I. Lubashev
 Intended status: Best Current Practice                            Akamai
-Expires: 13 September 2023                                 D. Montgomery
+Expires: 14 September 2023                                 D. Montgomery
                                                                 USA NIST
-                                                           12 March 2023
+                                                           13 March 2023
 
 
   Source Address Validation Using BGP UPDATEs, ASPA, and ROA (BAR-SAV)
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 September 2023.
+   This Internet-Draft will expire on 14 September 2023.
 
 Copyright Notice
 
@@ -73,11 +73,12 @@ Table of Contents
      6.4.  Automation is the Key
      6.5.  Implementation Guidelines
        6.5.1.  Management of Local RPKI Repository Caches
-   7.  IANA Considerations
-   8.  Security Considerations
-   9.  References
-     9.1.  Normative References
-     9.2.  Informative References
+   7.  Provider Interfaces
+   8.  IANA Considerations
+   9.  Security Considerations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
    Acknowledgements
    Authors' Addresses
 
@@ -126,9 +127,9 @@ Table of Contents
    by network operators to derive more robust SAV filters and thus
    improve network resilience.
 
-   The focus of this document is on the design of ingress SAV filters
-   for an interface facing a customer or lateral peer AS.  The same
-   procedure applies in both cases (Section 2).
+   The focus of this document is on the design of ingress SAV allowlist
+   filters for an interface facing a customer or lateral peer AS.  The
+   same procedure applies in both cases (Section 2).
 
    Throughout this document, ROA and ASPA data mean the payload data in
    cryptographically valid ROA and ASPA objects (see Section 4 in
@@ -250,13 +251,13 @@ Table of Contents
    excluded from inputs to the BAR-SAV procedure.  This ensures that BGP
    UPDATEs containing route leaks are not considered for BAR-SAV filter
    design.  Please see additional discussion about route leaks in
-   Section 8.
+   Section 9.
 
    As a further measure of security, validation of BGP routes in Adj-
    RIBs-In MUST be performed by applying RPKI-ROV [RFC6811] and any
    Invalid routes must be excluded from inputs to the BAR-SAV procedure.
    Please see additional discussion about prefix/route filtering in
-   Section 8.
+   Section 9.
 
    A detailed description of the BAR-SAV procedure is as follows:
 
@@ -496,11 +497,22 @@ Table of Contents
    SAV entirely since at least source addresses in unallocated and bogon
    space are rejected.
 
-7.  IANA Considerations
+7.  Provider Interfaces
+
+   For most networks, "loose uRPF" SAV mode described in [RFC3704] and
+   [RFC8704] is the current best practice for provider interfaces to
+   ensure no improper block.  It may be possible to use BGP UPDATE as
+   well as RPKI ROA and ASPA data to compute a list of prefixes that
+   originate exclusively within the customer cone and should only be
+   received by the AS on customer interfaces.  A set of such prefixes
+   can be used in conjuction with "loose uRPF" SAV mode as a blocklist
+   on provider interfaces.
+
+8.  IANA Considerations
 
    This document includes no request to IANA.
 
-8.  Security Considerations
+9.  Security Considerations
 
    The security considerations described in [RFC8704], [RFC6811],
    [I-D.ietf-sidrops-aspa-profile], and
@@ -517,9 +529,9 @@ Table of Contents
    [RFC9234] [I-D.ietf-grow-route-leak-detection-mitigation]
    [I-D.ietf-sidrops-aspa-verification] [sriram1]).
 
-9.  References
+10.  References
 
-9.1.  Normative References
+10.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -554,7 +566,7 @@ Table of Contents
               RFC 8704, DOI 10.17487/RFC8704, February 2020,
               <https://www.rfc-editor.org/info/rfc8704>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [RFC6480]  Lepinski, M. and S. Kent, "An Infrastructure to Support
               Secure Internet Routing", RFC 6480, DOI 10.17487/RFC6480,
