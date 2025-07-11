@@ -502,13 +502,13 @@ A detailed description of the procedure for BAR-SAV-PI is as follows:
       </t>
 <ol>
 <li> Per procedure in <xref target="method2"/>, compute AS-set D and Pfx-set Q for each customer interface of the AS in consideration. </li>
-<li> Form the union of the AS-sets found above and call it AS-set Du, and form the union of the Pfx-sets found above and call it Pfx-set Qu. </li>
+<li> Form the union of the AS-sets found above and call it AS-set Du. Also form the union of the Pfx-sets found above and call it Pfx-set Qu. </li>
 <li> Modify Pfx-set Qu to keep only the prefixes whose routes in the RIBs-In (of the customer interfaces in consideration) are all RPKI-ROV Valid and have Valid AS path per ASPA verification. </li>
 <li> Further modify Pfx-set Qu to keep only the prefixes that have all their allowed origin ASes (per ROAs) contained within AS-set Du. </li>
-<li> Further modify Pfx-set Qu to keep only the prefixes with all feasible routes from their respective origin AS to the local AS (i.e., AS doing SAV) such that each AS in the AS path of each route has all its Provider ASes (per ASPAs) contained within AS-set Du. Call the resulting modified set as Pfx-set S. </li>
-<li> Subtract Pfx-set S from the set of allowed prefixes that pertain to loose uRPF for the Provider interface  in consideration. Call this reduced set as Pfx-set Ga. </li>
-<li> From Pfx-set Ga, subtract (a) any prefixes originated by the local AS that are single-homed, and (b) any internal-use-only prefixes of the local AS. Call the resulting set as Pfx-set G. </li>
-<li> Apply Pfx-set G as the allow list for ingress SAV at each provider interface of the local AS. </li>
+<li> Further modify Pfx-set Qu to keep only the prefixes with all feasible routes from their respective origin ASes to the local AS (i.e., AS doing SAV) such that each AS in the AS path of each route has all its Provider ASes (per ASPAs) contained within AS-set Du. Call the resulting modified set as Pfx-set S. </li>
+<li> Subtract Pfx-set S from the set of allowed prefixes that pertain to loose uRPF for the Provider interfaces. Call this reduced set as Pfx-set Ga. </li>
+<li> From Pfx-set Ga, subtract (a) any prefixes originated by the local AS that are single-homed and (b) any internal-use-only prefixes of the local AS. Call the resulting set as Pfx-set G. </li>
+<li> Apply Pfx-set G as the allow list for ingress SAV at each provider interface of the local AS, after possibly extending Pfx-set G using an ACL configured for that provider interface. </li>
 </ol>
       <t>
 At Step 5 above, the feasible paths are computed by utilizing the customer-to-provider AS relationships that are discovered at Steps 5 and 7 in the algorithm in <xref target="method2"/> by making use of ASPA data and BGP AS_PATH data, respectively.
