@@ -16,6 +16,11 @@
 <!ENTITY I-D.ietf-grow-route-leak-detection-mitigation SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-grow-route-leak-detection-mitigation.xml">
 
 <!ENTITY I-D.ietf-sidrops-8210bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-sidrops-8210bis.xml">
+
+<!ENTITY I-D.haas-savnet-inter-domain-scaling SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.haas-savnet-inter-domain-scaling.xml">
+
+<!ENTITY I-D.qin-sidrops-toa SYSTEM
+"http://xml.resource.org/public/rfc/bibxml3/reference.I-D.qin-sidrops-toa.xml">
 ]>
 <!-- If further character entities are required then they should be added to the DOCTYPE above.
      Use of an external entity file is not recommended. -->
@@ -34,7 +39,7 @@
   version="3">
 -->
 
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" submissionType="IETF" category="bcp" docName="draft-ietf-sidrops-bar-sav-06" updates="8704" obsoletes="" ipr="trust200902">
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" submissionType="IETF" category="bcp" docName="draft-ietf-sidrops-bar-sav-08" updates="8704" obsoletes="" ipr="trust200902">
   <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
   <?rfc toc="yes" ?>
   <?rfc symrefs="yes" ?>
@@ -71,7 +76,7 @@
           <code>20899</code>
           <country>United States of America</country>
         </postal>
-        <email>ksriram@nist.gov</email>
+        <email>sriram.ietf@gmail.com</email>
       </address>
     </author>
 
@@ -144,13 +149,13 @@ New technology for securing the Border Gateway Protocol (BGP) <xref target="RFC4
 
 These are the Route Origin Authorization (ROA) and the Autonomous System Provider Authorization (ASPA) objects. A ROA is a cryptographically signed attestation by an IP address-resource holder listing their prefixes that are authorized to be originated in BGP by a specific autonomous system (AS) <xref target="RFC6482"/>. ROAs are currently used for RPKI-based Route Origin Validation (RPKI-ROV) <xref target="RFC6811"/> <xref target="RFC9319"/>.
 
-An ASPA is a cryptographically signed attestation by an AS listing its transit provider AS numbers (ASNs) <xref target="I-D.ietf-sidrops-aspa-profile"/>. The ASPA data is designed to be used for a form of AS path validation that can detect and mitigate route leaks <xref target="I-D.ietf-sidrops-aspa-verification"/> <xref target="sriram1"/>. See <xref target="RFC7908"/> for the definition of route leaks.
+An ASPA is a cryptographically signed attestation by an AS listing its transit provider AS numbers (ASNs) <xref target="I-D.ietf-sidrops-aspa-profile"/>. The ASPA data is designed to be used for a form of AS path validation that can detect and mitigate route leaks <xref target="I-D.ietf-sidrops-aspa-verification"/>. See <xref target="RFC7908"/> for the definition of route leaks.
 
 
       </t>
       <t>
 
-This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <xref target="method1"/> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is considered to be ubiquitous. However, for use in the period before that, another method for SAV is presented in <xref target="method2"/> that makes complementary use of BGP UPDATE messages along with ASPA and ROA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is expected that just as the adoption of ROAs is growing at present <xref target="Monitor"/>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <xref target="RFC8704"/>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
+This document advances the technology for SAV filter design using methods that make use of ASPA, ROA, and/or BGP UPDATE data. A method is presented in <xref target="method1"/> that makes use of only ASPA and ROA data to design the SAV filter. This method is for use in the future when the adoption of ROA and ASPA is ubiquitous. However, for use in the period before that, another method for SAV is presented in <xref target="method2"/> that makes complementary use of BGP UPDATE messages along with ASPA and ROA data. Accordingly, the latter method's name is abbreviated as BAR-SAV. It is expected that just as the adoption of ROAs is growing at present <xref target="Monitor"/>, the adoption of ASPA will also gain momentum in the near future. The BAR-SAV method additionally incorporates a refined version of Algorithm A of the EFP-uRPF technique (Section 3.1 of <xref target="RFC8704"/>). BAR-SAV can be used by network operators to derive more robust SAV filters and thus improve network resilience.
       </t>
     <t>
 This document describes the design of ingress SAV allowlist filters for an interface facing a customer or lateral peer AS (<xref target="method1"/>, <xref target="method2"/>). The same procedure applies in both cases (<xref target="observe"/>). This document also describes the design of ingress SAV allowlist filters for an interface facing a transit provider (<xref target="Provider"/>).
@@ -378,6 +383,9 @@ For example, in <xref target="fig1"/>, the CDN announces an anycast prefix P3 (f
 <t>
 Existing SAV methods of <xref target="RFC3704"/> and EFP-uRPF <xref target="RFC8704"/> would not allow AS4 to include P3 as a legitimate SA prefix on the interface to AS2. However, if the CDN (owner of prefix P3) registers a ROA object authorizing AS2 to originate P3, and AS4 uses an SAV procedure specified in this document (<xref target="method2"/>), then AS4 will use that ROA object to include P3 as a valid source prefix for the AS2 customer interface. The CDN may never want to announce a route to P3 from AS2, but the existence of this ROA would result in the construction of an SAV filter that would permit AS2 to send data packets with source addresses belonging to P3.
 </t>
+<t>
+The CDN/DSR example above shows the DSR AS (i.e., AS2) as a customer of the AS doing SAV (i.e., AS4). The method described in this section works even when the DSR AS is a lateral peer of the AS doing SAV (see <xref target="observe"/>).
+</t>
 
 <!--An alternative solution for the CDN in the example above would be to publish an ASPA object naming AS2 as a Provider_ASN for AS3. As in the solution that uses ROA, the CDN would never want to advertise a route with AS_PATH [AS2 AS3], but the ASPA would serve as an authorization for AS2 to send packets with source addresses belonging to AS3's prefixes. -->
 
@@ -388,8 +396,44 @@ The CDN example above is just one DSR scenario. There are other cloud-based DSR 
 <t>
 Recommendation: In a DSR scenario, a network operator must register ROAs that bind the edge server ASes with the anycast service prefix. This is in addition to registering a ROA authorizing the anycast server AS to announce the anycast prefix.
 </t>
+      </section>
+      <section anchor="sp-pfx" numbered="true">
+        <name>Prefixes Not Globally Routed but Used for Source Address</name>
+<t>
+Prefixes that are not globally routed but used for source address fall into two categories as follows:
+</t>
 
-
+      <ul>
+<li> Type 1: Internal-use prefixes within specific ASes and emitted in data packets as source address only from those individual ASes. </li>
+<li> Type 2: IANA allocated prefixes or addresses (application/service specific) that are not globally reachable but can be emitted in data packets as source address from perhaps any AS <xref target="IANA-v4-sp"/> <xref target="IANA-v6-sp"/>. </li>
+      </ul>
+<t>
+The total number of either type of prefixes is expected to be very few. 
+<!-- Type 1 prefix owners seem willing to register ROAs or even announce the prefix in BGP to facilitate SAV (survey and quantification of this would be helpful). -->    
+</t>
+<t>
+Type 1 prefix owners MUST register ROAs for their prefixes including the ASes from where the prefix may be used for traffic sourcing.
+The ROAs allow the BAR-SAV algorithm to discover and include these prefixes in the SAV tables only for those interfaces where they belong in the respective customer cone.
+These prefixes will also be augmented by default to the SAV tables of all provider interfaces.    
+</t>
+<t>
+Note: Discussions about Traffic Origin Authorization (TOA) <xref target="I-D.qin-sidrops-toa"/> are in progress in the IETF. TOA in conjunction with an AS0 ROA is possibly an alternative way of discovering Type 1 prefixes for SAV. The BAR-SAV algorithms in this document can easily accommodate the use of TOA if its adoption occurs in the IETF. 
+</t>
+<t>
+Type 2 prefixes need to be carefully gleaned from IANA listed special-purpose IPv4 and IPv6 prefix lists. These are normally marked with Source = True, Destination = False, and Globally Reachable = False. Examples of Type 2 prefixes are 0.0.0.0/32, ::/128, 192.0.0.8/32, and 100:0:0:1::/64. Better understanding of the use of these addresses still needs to be developed for their implications for SAV, e.g., which interfaces may they appear on (e.g., only customer interfaces) and what is their propagation scope (e.g., internal to an ISP network and the IP packets do not exit the ISP's AS)?  
+</t>
+<t>
+Type 2 prefixes are not allocated to anyone in particular. For these prefixes, one possibility is to have an RIR register a ROA(s) with an IANA allocated special purpose ASN, and then the prefixes can be discovered and augmented universally to the ingress SAV table for any interface at any AS. Another possibility is that the prefixes can be just baked into the IETF specification for such augmentation. Another possibility is to leave the SAV handling of these prefixes up to an ISP and its customer ASes in case the prefixes are known not to propagate beyond the customer AS or the ISP.
+</t>
+      </section>
+      <section anchor="timing" numbered="true">
+        <name>Co-ordination of BAR-SAV with FIB/RIB-In and RPKI</name>
+<t>
+It is essential for the BAR-SAV mechanism to be coordinated with the FIB/RIB-In to ensure that any route that may be received on the router interface in consideration (and eligible for best path selection) is considered in the SAV table computation. This coordination is necessary for achieving zero blocking of legitimate traffic (i.e., zero improper blocking) <xref target="I-D.haas-savnet-inter-domain-scaling"/>. Therefore, when a BGP session is started or restarted, the SAV table computation and the subsequent enforcement of SAV on the interface must be delayed to allow for routing convergence to complete. If BGP Updates arrive during the SAV table computation, those Updates should be used to update the SAV table as quickly as possible. If a BGP Withdraw message is received, hysteresis must be applied as described in <xref target="transient"/>. The computation of the SAV table is a continuous process, and it accommodates the dynamics of BGP (arrival and withdrawal of Updates) following the initial convergence after the BGP session start or restart.
+</t>
+<t>
+BAR-SAV requires that the SAV table also stays coordinated with the dynamics in RPKI (ROAs and ASPAs) and is updated promptly in response to the changes in ROAs and ASPAs.
+</t>
       </section>
 
       </section>
@@ -403,7 +447,7 @@ This section highlights some important operations and management considerations 
       <t>
 A transit provider is a network that (a) offers its customers outbound (customer to Internet) data traffic connectivity and/or (b) further propagates in all directions (towards providers, lateral peers, and other customers) any BGP Updates that the customer may send <xref target="I-D.ietf-sidrops-aspa-profile"/>.
 In the latter case, it also provides transport for inbound data traffic.
-      In all cases, the customer AS should follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, prevents route leaks involving the customer AS, and facilitates BAR-SAV.
+      In all cases, the customer AS should follow the specification in <xref target="I-D.ietf-sidrops-aspa-profile"/> and include the transit provider AS in its ASPA. Registering an ASPA prevents forged-origin hijacks for the customer AS and its prefixes, prevents route leaks involving the customer AS and facilitates BAR-SAV.
       </t>
       <t>
 If a prefix is used for source addresses for hosts attached at an AS but not announced in BGP from that AS (e.g., the DSR scenario in <xref target="cdn"/>), a ROA must be registered binding the prefix and the AS. This ROA registration assists in preventing hijacking of the prefix and helps facilitate BAR-SAV. It may be noted that a similar usage of ROA is made in the context of DDoS mitigation (see Section 5.1 in <xref target="RFC9319"/>), where hypothetically the prefix may never need to be originated by the AS of the DDoS mitigation provider.
@@ -481,29 +525,33 @@ It is possible for an RPKI signed object to be temporarily missing from the repo
     </section>
 
     <section anchor="Provider">
-      <name>BAR-SAV Provider Interface (BAR-SAV-PI) Procedure</name>
-      <t>For most networks, "loose uRPF" SAV mode described in <xref target="RFC3704"/> and <xref target="RFC8704"/> is the current best practice for ingress SAV at provider interfaces of an AS to ensure no improper block. It is possible to use BGP UPDATE as well as RPKI ROA and ASPA data to compute a list of prefixes that originate exclusively within the customer cone and should be received by the AS only on customer interfaces. A set of such prefixes (call it Pfx-set S) can be substracted from the list of allowed prefixes for SAV based on the loose uRPF method <xref target="RFC3704"/> <xref target="RFC8704"/>. The following criteria apply for determining Pfx-set S: (1) only those prefixes would be included which are RPKI-ROV Valid and whose ROAs show that they are originated exclusively within the customer cone (CC) of the AS, AND (2) the received AS paths (for prefixes in Pfx-set S) on the customer interfaces at the Provider AS are all Valid per ASPA-based verification, AND (3) based on ASPAs, none of the ASes in the afore-mentioned AS paths have a provider AS outside of the CC in question.
+      <name>BAR-SAV on Provider Interface (BAR-SAV-PI)</name>
+      <t>For most networks, "loose uRPF" SAV method described in <xref target="RFC3704"/> and <xref target="RFC8704"/> is the current best practice for ingress SAV at provider interfaces of an AS to ensure no improper block. It is possible to use BGP UPDATE as well as RPKI ROA and ASPA data to compute a list of prefixes that originate exclusively within the CC of the AS (<xref target="method2"/>) and have all feasible AS paths to the AS exclusively within the CC. A set of such prefixes (call it Pfx-set S) can be subtracted from the list of allowed prefixes for SAV based on the loose uRPF method <xref target="RFC3704"/> <xref target="RFC8704"/>.
+      <!-- The following criteria apply for determining Pfx-set S: (1) prfixes RPKI-ROV Valid and whose ROAs show that they are originated exclusively within the CC of the AS, AND (2) all feasible AS paths to the AS (for prefixes in Pfx-set S) are Valid per ASPA-based verification, AND (3) based on ASPAs, none of the ASes in the afore-mentioned feasible AS paths have a provider AS outside of the CC in consideration. -->
       </t>
       <t>
-A detailed description of the BAR-SAV provider interface procedure (BAR-SAV-PI) is as follows:
+A detailed description of the procedure for BAR-SAV-PI is as follows:
       </t>
 <ol>
 <li> Per procedure in <xref target="method2"/>, compute AS-set D and Pfx-set Q for each customer interface of the AS in consideration. </li>
-<li> Form the union of the AS-sets found above and call it AS-set Du, and form the union of the Pfx-sets found above and call it Pfx-set Qu. </li>
-<li> Modify Pfx-set Qu to keep only the prefixes whose routes in the RIBs-In (of the customer interfaces in consideration) are all RPKI-ROV Valid and all have Valid AS path per ASPA verification. </li>
+<li> Form the union of the AS-sets found above and call it AS-set Du. Also form the union of the Pfx-sets found above and call it Pfx-set Qu. </li>
+<li> Modify Pfx-set Qu to keep only the prefixes whose routes in the RIBs-In (of the customer interfaces in consideration) are all RPKI-ROV Valid and have Valid AS path per ASPA verification. </li>
 <li> Further modify Pfx-set Qu to keep only the prefixes that have all their allowed origin ASes (per ROAs) contained within AS-set Du. </li>
-<li> Further modify Pfx-set Qu to keep only the prefixes with all routes in the RIBs-In (of the customer interfaces in consideration) such that each AS in the AS path of each route has all its Provider ASes (per ASPAs) contained within AS-set Du. Call the resulting modified set as Pfx-set S. </li>
-<li> Substract Pfx-set S from the set of allowed prefixes that pertain to loose uRPF for the Provider interface  in consideration. Call this reduced set as Pfx-set Ga. </li>
-<li> From Pfx-set Ga, substract any prefixes originated by the local AS that are single-homed and any internal-use-only prefixes of the local AS. Call the resulting set as Pfx-set G. </li>
-<li> Apply Pfx-set G as the allow list for ingress SAV at each provider interface of the local AS. </li>
+<li> Further modify Pfx-set Qu to keep only the prefixes with all feasible routes from their respective origin ASes to the local AS (i.e., AS doing SAV) such that each AS in the AS path of each route has all its Provider ASes (per ASPAs) contained within AS-set Du. Call the resulting modified set as Pfx-set S. </li>
+<li> Subtract Pfx-set S from the set of allowed prefixes that pertain to loose uRPF for the Provider interfaces. Call this reduced set as Pfx-set Ga. </li>
+<li> From Pfx-set Ga, subtract (a) any prefixes originated by the local AS that are single-homed and (b) any internal-use-only prefixes of the local AS. Call the resulting set as Pfx-set G. </li>
+<li> Apply Pfx-set G as the allow list for ingress SAV at each provider interface of the local AS, after possibly extending Pfx-set G using an ACL configured for that provider interface. </li>
 </ol>
       <t>
-The BAR-SAV-PI procedure described above is a SAV method for provider interfaces that is expected to be directionally more accurate than loose uRPF and would result in fewer improper permits. The performance improves incrementally with increasing deployment of ROAs and ASPAs in the AS's customer cone.
+At Step 5 above, the feasible paths are computed by utilizing the customer-to-provider AS relationships that are discovered at Steps 5 and 7 in the algorithm in <xref target="method2"/> by making use of ASPA data and BGP AS_PATH data, respectively.
+      </t>
+      <t>
+The BAR-SAV-PI method described above is expected to be directionally more accurate than loose uRPF and would result in fewer improper permits. Avoiding improper permits would improve incrementally with increasing deployment of ROAs and ASPAs in the AS's customer cone. Improper blocking is expected to be zero.
       </t>
 
 <!--
       <t>
-         xxx new text - An AS that is doing SAV on an interface with a provider AS, the following principles apply: (1) it must not reject any SA in prefixes that originate outside its own customer cone (CC); (2) is must not reject any SA in the prefixes that originate in its own CC but may be multi-homed to a provider outside its own CC; (3) it must reject bogon prefixes (i.e., special purpose IANA prefixes and unallocated prefixes). Use of ACLs is not practical here b of the large numbers of unallocated IPv6 prefixes. So, loose uRPF is the common sense choice here. However, two types prefixes should be excluded from the allowed list for the SAV using loose uRPF: (1) any prefixes that are internal to the AS in question (that is doing SAV), and (2) any prefixes in the AS's CC that are known unabmiguously to be not multi-homed to a provider outside the AS's CC.
+         new text - An AS that is doing SAV on an interface with a provider AS, the following principles apply: (1) it must not reject any SA in prefixes that originate outside its own customer cone (CC); (2) is must not reject any SA in the prefixes that originate in its own CC but may be multi-homed to a provider outside its own CC; (3) it must reject bogon prefixes (i.e., special purpose IANA prefixes and unallocated prefixes). Use of ACLs is not practical here b of the large numbers of unallocated IPv6 prefixes. So, loose uRPF is the common sense choice here. However, two types prefixes should be excluded from the allowed list for the SAV using loose uRPF: (1) any prefixes that are internal to the AS in question (that is doing SAV), and (2) any prefixes in the AS's CC that are known unabmiguously to be not multi-homed to a provider outside the AS's CC.
       </t>
 -->
     </section>
@@ -538,6 +586,9 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.8704.xml"/>
 
+&I-D.ietf-sidrops-aspa-profile;
+&I-D.ietf-sidrops-aspa-verification;
+
       </references>
 
       <references>
@@ -550,10 +601,10 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.9286.xml"/>
         <xi:include href="https://www.rfc-editor.org/refs/bibxml/reference.RFC.9319.xml"/>
 
-&I-D.ietf-sidrops-aspa-profile;
-&I-D.ietf-sidrops-aspa-verification;
 &I-D.ietf-grow-route-leak-detection-mitigation;
 &I-D.ietf-sidrops-8210bis;
+&I-D.haas-savnet-inter-domain-scaling;
+&I-D.qin-sidrops-toa;
 
         <reference anchor="IANA-sp-ASN" target="https://www.iana.org/assignments/iana-as-numbers-special-registry/iana-as-numbers-special-registry.xhtml">
             <front>
@@ -565,7 +616,8 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
             <seriesInfo name="IANA web page," value="" />
         </reference>
 
-        <reference anchor="sriram1" target="https://datatracker.ietf.org/meeting/110/materials/slides-110-sidrops-sriram-aspa-alg-accuracy-01">
+<!--
+		<reference anchor="sriram1" target="https://datatracker.ietf.org/meeting/110/materials/slides-110-sidrops-sriram-aspa-alg-accuracy-01">
             <front>
                 <title>On the Accuracy of Algorithms for ASPA Based Route Leak Detection</title>
                 <author initials="K." surname="Sriram"><organization /></author>
@@ -574,7 +626,7 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
             </front>
             <seriesInfo name="IETF SIDROPS Meeting," value="Proceedings of the IETF 110, March 2021" />
         </reference>
-<!--
+
         <reference anchor="sriram2" target="https://datatracker.ietf.org/meeting/113/materials/slides-113-sidrops-aspa-verification-procedures-01">
             <front>
                 <title>ASPA Verification Procedures: Enhancements and RS Considerations</title>
@@ -589,7 +641,6 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
                 <title>NIST RPKI Monitor</title>
                 <author initials="" surname=""><organization /></author>
                 <date year="" />
-
             </front>
             <seriesInfo name="National Institute of Standards and Technology (NIST) online tool," value="" />
         </reference>
@@ -602,6 +653,22 @@ The security and robustness of BAR-SAV are strengthened by supporting mechanisms
                 <date year="" />
             </front>
             <seriesInfo name="NIST Special Publication, initial public draft," value="NIST SP 800-189r1, January 2025" />
+        </reference>
+        <reference anchor="IANA-v4-sp" target="https://www.iana.org/assignments/iana-ipv4-special-registry">
+            <front>
+                <title>IPv4 Special-Purpose Address Space</title>
+                <author initials="" surname=""><organization /></author>
+                <date year="" />
+            </front>
+            <seriesInfo name="" value="" />
+        </reference>
+        <reference anchor="IANA-v6-sp" target="http://www.iana.org/assignments/iana-ipv6-special-registry">
+            <front>
+                <title>IPv6 Special-Purpose Address Space</title>
+                <author initials="" surname=""><organization /></author>
+                <date year="" />
+            </front>
+            <seriesInfo name="" value="" />
         </reference>
 <!--
         <reference anchor="NIST-800-189" target="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-189.pdf">
